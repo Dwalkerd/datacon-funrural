@@ -104,7 +104,11 @@ main.wrap { padding-block: 20px 48px; display: grid; gap: 20px; }
 
 /* barra de filtros */
 .filtros { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
-.filtros input[type=search] { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 7px 12px; min-width: 0; width: 260px; max-width: 100%; }
+.filtros input[type=search], .cliente-topo input[type=search] { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 7px 12px; min-width: 0; width: 300px; max-width: 100%; }
+.sel-ordem { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 6px 8px; }
+th .th-ord { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; white-space: nowrap; }
+th .th-ord:hover, th .th-ord:focus-visible { color: var(--accent); }
+th .th-ord .seta { display: inline-block; width: 1em; text-align: center; color: var(--accent); }
 .chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 5px 12px; cursor: pointer; font-size: 0.85rem; }
 .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
@@ -118,7 +122,7 @@ tr:last-child td { border-bottom: 0; }
 tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
 .nome { font-weight: 600; max-width: 260px; }
 .nome small { display: block; font-weight: 400; color: var(--ink-3); }
-.cel-input { width: 128px; border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; text-align: right; background: var(--surface); font-variant-numeric: tabular-nums; }
+.cel-input { width: 142px; border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; text-align: right; background: var(--surface); font-variant-numeric: tabular-nums; }
 .cel-input.editado { border-color: var(--accent); background: var(--accent-soft); }
 td select { border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; background: var(--surface); max-width: 170px; }
 .pill { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 0.76rem; font-weight: 600; white-space: nowrap; }
@@ -146,7 +150,7 @@ td select { border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px;
 .opcao { border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: grid; gap: 6px; min-width: 0; }
 .opcao.vence { border-color: var(--good); box-shadow: inset 0 0 0 1px var(--good); }
 .opcao .titulo { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; }
-.opcao .valor { font-family: var(--font-display); font-stretch: 78%; font-weight: 780; font-size: 2.4rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.opcao .valor { font-family: var(--font-display); font-stretch: 78%; font-weight: 780; font-size: 2.15rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .opcao .valor small { font-size: 1rem; font-weight: 600; color: var(--ink-2); font-stretch: 90%; }
 .barras { display: grid; gap: 10px; }
 .barra { display: grid; grid-template-columns: 150px minmax(0, 1fr) 120px; gap: 12px; align-items: center; }
@@ -215,15 +219,15 @@ body.modo-cliente { background: #f4f6f7; }
 
 /* PDF (Ctrl+P ou botão Gerar PDF): só a ficha do cliente, em A4, com as cores impressas */
 @media print {
-  @page { size: A4 portrait; margin: 10mm 12mm 11mm; }
+  @page { size: A4 portrait; margin: 9mm 12mm 9mm; }
   html, body { background: #ffffff !important; }
   body { font-size: 9pt; line-height: 1.3; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .top, .abas-faixa, .so-equipe, .sair-cliente, .toast { display: none !important; }
   main.wrap { max-width: none !important; padding: 0 !important; display: block; }
   #v-cliente > div { gap: 0; }
-  .folha-cliente { border: 0; border-radius: 0; padding: 14px 0 0; gap: 8px; display: flex; flex-direction: column; min-height: 266mm; }
+  .folha-cliente { border: 0; border-radius: 0; padding: 14px 0 0; gap: 6px; display: flex; flex-direction: column; min-height: 270mm; }
   .rodape-marca { margin-top: auto; }
-  .logo-dc { height: 54px; }
+  .logo-dc { height: 50px; }
   .faixa-marca { padding-bottom: 7px; gap: 8px 16px; }
   .faixa-marca .marca-dc { font-size: 0.92rem; }
   .faixa-sub { font-size: 0.76rem; }
@@ -242,25 +246,25 @@ body.modo-cliente { background: #f4f6f7; }
   .opcao .valor { font-size: 1.5rem; }
   .opcao .valor small { font-size: 0.75rem; }
   .opcao .small { font-size: 0.74rem; }
-  #cli-resultado { gap: 8px !important; }
+  #cli-resultado { gap: 6px !important; }
   .veredito { font-size: 1rem; }
   .barras { gap: 4px; }
   .barra { grid-template-columns: 105px minmax(0, 1fr) 85px; gap: 8px; font-size: 0.8rem; }
   .barra .trilho { height: 13px; }
-  .equilibrio { padding: 6px 10px; gap: 3px; }
-  .equilibrio p { font-size: 0.8rem; }
-  .escala { height: 26px; }
-  .escala .linha { top: 10px; }
-  .escala .ponto { top: 2px; }
-  .escala .ponto i { height: 22px; }
+  .equilibrio { padding: 5px 10px; gap: 2px; }
+  .equilibrio p { font-size: 0.78rem; }
+  .escala { height: 22px; }
+  .escala .linha { top: 8px; }
+  .escala .ponto { top: 1px; }
+  .escala .ponto i { height: 20px; }
   .escala-rot { font-size: 0.7rem; }
-  .memoria { gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-  .memoria table { font-size: 0.72rem; }
-  .memoria td, .memoria th { padding: 2px 5px; }
+  .memoria { gap: 8px; grid-template-columns: 1fr !important; }
+  .memoria table { font-size: 0.74rem; }
+  .memoria td, .memoria th { padding: 1px 8px; }
   .memoria th { font-size: 0.62rem; }
   .tabela-caixa { overflow: visible; }
   th { position: static; }
-  .notas { font-size: 0.72rem; gap: 1px; line-height: 1.3; }
+  .notas { font-size: 0.7rem; gap: 1px; line-height: 1.25; }
   .rodape-cli { padding-top: 6px; font-size: 0.66rem; }
   .rodape-marca { font-size: 0.7rem; padding-top: 6px; grid-template-columns: 1fr auto; gap: 0 16px; }
   .rodape-marca > div:first-child { grid-column: 1 / -1; }
@@ -302,7 +306,7 @@ body.modo-cliente { background: #f4f6f7; }
   <div class="wrap">
     <div class="marca">
       <h1>Funrural 2027</h1>
-      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 23/11/2026 16:51</span></span>
+      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 23/11/2026 17:07</span></span>
     </div>
     <span class="privado" title="A página lê os arquivos no seu computador. Nada é enviado para servidor.">Dados só neste navegador</span>
     <div class="acoes">
@@ -334,7 +338,10 @@ body.modo-cliente { background: #f4f6f7; }
     <div style="display:grid;gap:16px">
       <div class="kpis" id="kpis"></div>
       <div class="filtros">
-        <input type="search" id="busca" placeholder="Buscar produtor ou código" aria-label="Buscar produtor ou código">
+        <input type="search" id="busca" placeholder="Buscar pelo nome, código ou CPF/CNPJ" aria-label="Buscar pelo nome, código ou CPF/CNPJ" autocomplete="off">
+        <label class="muted small" for="ordem" style="display:flex;align-items:center;gap:6px">Ordenar por
+          <select id="ordem" class="sel-ordem"></select></label>
+        <span class="muted small" id="contagem" aria-live="polite"></span>
         <div style="display:flex;flex-wrap:wrap;gap:6px" id="chips"></div>
         <span class="muted small" id="fontes" style="margin-left:auto"></span>
       </div>
@@ -347,8 +354,11 @@ body.modo-cliente { background: #f4f6f7; }
     <div style="display:grid;gap:16px">
       <div class="cliente-topo so-equipe">
         <div class="sel">
+          <label class="label" for="busca-cliente">Buscar</label>
+          <input type="search" id="busca-cliente" placeholder="Digite parte do nome" aria-label="Buscar produtor pelo nome" autocomplete="off">
           <label class="label" for="sel-produtor">Produtor</label>
           <select id="sel-produtor"></select>
+          <span class="muted small" id="cont-cli" aria-live="polite"></span>
         </div>
         <div class="acoes-cli">
           <button class="btn" type="button" id="bt-pdf">Gerar PDF</button>
@@ -716,6 +726,8 @@ function codigosVinculados(p) {
 function encsDe(p) {
   return [p.enc, ...codigosVinculados(p).map(c => S.base.enc[c] || (S.produtores[c] && S.produtores[c].enc))].filter(Boolean);
 }
+// Todo valor em reais trabalha em centavos: arredonda uma vez, na origem, para que o que aparece na tela feche com a conta.
+const r2 = x => Math.round(((x || 0) + Number.EPSILON) * 100) / 100;
 function receitaBase(p) { return p.fat && p.fat.meses ? p.fat.total * 12 / p.fat.meses : 0; }
 function mediaBase(p) { return encsDe(p).reduce((s, e) => s + (e.meses ? e.remuneracao / e.meses : 0), 0); }
 function receita(p) { return p.receitaPrev !== null && p.receitaPrev !== undefined ? p.receitaPrev : receitaBase(p); }
@@ -739,14 +751,14 @@ function lista() {
 function ativos() { return lista().filter(p => !p.excluido && !vinculadoA(p.codigo)); }
 
 function calcular(p) {
-  const pr = S.premissas, R = receita(p), M = media(p), W = M * pr.multFolha, g = gilrat(p);
+  const pr = S.premissas, R = r2(receita(p)), M = r2(media(p)), W = r2(M * pr.multFolha), g = gilrat(p);
   const linhas = (pr[p.pessoa] || pr.PF).map(l => {
     const aliq = l.gilrat ? g : l.aliq;
     const base = l.base === 'receita' ? R : W;
-    return { ...l, aliq, baseValor: base, valor: aliq * base };
+    return { ...l, aliq, baseValor: base, valor: r2(aliq * base) };
   });
   const C = linhas.filter(l => l.incide.includes('C')), F = linhas.filter(l => l.incide.includes('F'));
-  const soma = a => a.reduce((s, l) => s + l.valor, 0);
+  const soma = a => r2(a.reduce((s, l) => s + l.valor, 0));
   const taxa = (a, base) => a.filter(l => l.base === base).reduce((s, l) => s + l.aliq, 0);
   const custoC = soma(C), custoF = soma(F);
   const semFolha = !(M > 0), semReceita = !(R > 0);
@@ -758,14 +770,14 @@ function calcular(p) {
   const atual = opcaoAtual(p);
   const custoAtual = atual === 'F' ? custoF : atual === 'C' ? custoC : null;
   const custoMelhor = melhor === 'F' ? custoF : custoC;
-  const ganho = custoAtual !== null && atual !== melhor && !semFolha && !semReceita ? custoAtual - custoMelhor : 0;
+  const ganho = custoAtual !== null && atual !== melhor && !semFolha && !semReceita ? r2(custoAtual - custoMelhor) : 0;
   const mudar = ganho > 0 && ganho >= pr.margem * custoAtual && !suspeita;
   // equilíbrio: custoC = custoF  =>  W* = R × (aCR − aFR) / (aFF − aCF)
   const aCR = taxa(C, 'receita'), aCF = taxa(C, 'folha'), aFR = taxa(F, 'receita'), aFF = taxa(F, 'folha');
   const wEq = aFF > aCF ? R * (aCR - aFR) / (aFF - aCF) : null;
   return { R, M, W, g, linhasC: C, linhasF: F, custoC, custoF, melhor, atual, custoAtual, ganho, mudar, semFolha, semReceita, suspeita,
     aCR, aFR, aFF,
-    dif: Math.abs(custoC - custoF), wEq, mEq: wEq !== null ? wEq / pr.multFolha : null };
+    dif: r2(Math.abs(custoC - custoF)), wEq, mEq: wEq !== null ? wEq / pr.multFolha : null };
 }
 
 function alertas(p, c) {
@@ -801,12 +813,12 @@ function linhaExcel(p) {
     'Origem': p.origem === 'controle' ? `Planilha do Fiscal: ${p.tribCtl.toLowerCase()}` : (p.sinal ? `Folha: ${p.sinal.rotulo}` : ''),
     'Opção atual': c.atual ? OPC[c.atual] : '', 'Opção calculada no Domínio': dom ? OPC[dom] : 'sem folha',
     'Faturado no período': p.fat ? p.fat.total : '', 'Período do faturamento': p.fat ? p.fat.periodo : '',
-    'Receita prevista 2027': Math.round(c.R), 'Receita editada': p.receitaPrev !== null ? 'sim' : 'não',
-    'Folha média mensal': Math.round(c.M), 'Folha editada': p.mediaFolha !== null ? 'sim' : 'não', 'Empregados': empregados(p) || '',
+    'Receita prevista 2027': c.R, 'Receita editada': p.receitaPrev !== null ? 'sim' : 'não',
+    'Folha média mensal': c.M, 'Folha editada': p.mediaFolha !== null ? 'sim' : 'não', 'Empregados': empregados(p) || '',
     'Folha somada de': codigosVinculados(p).join(', '),
-    'Folha anual estimada': Math.round(c.W), 'GILRAT': c.g,
-    'Custo comercialização': Math.round(c.custoC), 'Custo folha': c.semFolha ? '' : Math.round(c.custoF), 'Menor custo': c.semReceita ? 'sem receita' : OPC[c.melhor],
-    'Economia ao mudar': c.mudar ? Math.round(c.ganho) : '', 'Folha mensal de equilíbrio': c.mEq !== null && !c.semFolha ? Math.round(c.mEq) : '',
+    'Folha anual estimada': c.W, 'GILRAT': c.g,
+    'Custo comercialização': c.custoC, 'Custo folha': c.semFolha ? '' : c.custoF, 'Menor custo': c.semReceita ? 'sem receita' : OPC[c.melhor],
+    'Economia ao mudar': c.mudar ? c.ganho : '', 'Folha mensal de equilíbrio': c.mEq !== null && !c.semFolha ? r2(c.mEq) : '',
     'Status': p.status, 'Decisão 2027': p.decisao ? OPC[p.decisao] : '', 'Observação': p.obs,
     'Situação': p.excluido ? 'fora da lista' : (vinculadoA(p.codigo) ? 'folha somada no ' + vinculadoA(p.codigo) : ''),
     'Conferir': alertas(p, c).filter(a => a.n !== 'info').map(a => a.t).join(' | ')
@@ -814,17 +826,34 @@ function linhaExcel(p) {
 }
 function montarExcel() {
   const wb = XLSX.utils.book_new();
-  const L = lista();
+  const L = lista().sort(porNome);
   const ws1 = XLSX.utils.json_to_sheet(L.map(linhaExcel));
-  ws1['!cols'] = [8, 36, 6, 34, 16, 16, 16, 20, 16, 8, 14, 8, 10, 12, 14, 8, 16, 14, 16, 14, 14, 14, 16, 40, 18, 60].map(wch => ({ wch }));
+  ws1['!cols'] = [8, 36, 6, 34, 16, 16, 18, 20, 18, 8, 16, 8, 10, 12, 16, 8, 18, 16, 16, 16, 16, 14, 16, 40, 18, 60].map(wch => ({ wch }));
+  // valores em reais com 2 casas e alíquotas em %: o Excel mostra no padrão do computador (vírgula no Brasil)
+  const MOEDA = new Set(['Faturado no período', 'Receita prevista 2027', 'Folha média mensal', 'Folha anual estimada', 'Custo comercialização', 'Custo folha', 'Economia ao mudar', 'Folha mensal de equilíbrio']);
+  const faixa = XLSX.utils.decode_range(ws1['!ref']);
+  for (let c = faixa.s.c; c <= faixa.e.c; c++) {
+    const titulo = ws1[XLSX.utils.encode_cell({ r: 0, c })]; if (!titulo) continue;
+    const z = MOEDA.has(titulo.v) ? '#,##0.00' : (titulo.v === 'GILRAT' ? '0.00%' : null); if (!z) continue;
+    for (let r = 1; r <= faixa.e.r; r++) { const cel = ws1[XLSX.utils.encode_cell({ r, c })]; if (cel && cel.t === 'n') cel.z = z; }
+  }
   XLSX.utils.book_append_sheet(wb, ws1, 'Consolidado');
   const pr = S.premissas;
   const prem = [['Premissa', 'Valor'], ['Folha anual = média mensal ×', pr.multFolha], ['GILRAT padrão', pr.gilratPadrao], ['Diferença mínima para sinalizar', pr.margem], [], ['Pessoa', 'Contribuição', 'Alíquota', 'Base', 'Incide em', 'Fonte']];
   for (const k of ['PF', 'PJ']) for (const l of pr[k]) prem.push([k, l.nome, l.gilrat ? 'do produtor' : l.aliq, l.base, { C: 'Comercialização', F: 'Folha', CF: 'Nas duas' }[l.incide], l.fonte || '']);
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(prem), 'Premissas');
+  const wsPrem = XLSX.utils.aoa_to_sheet(prem);
+  prem.forEach((linha, r) => {
+    const aliq = wsPrem[XLSX.utils.encode_cell({ r, c: 2 })];
+    if ((linha[0] === 'PF' || linha[0] === 'PJ') && aliq && aliq.t === 'n') aliq.z = '0.00%';
+    if (r >= 1 && r <= 3) { const v = wsPrem[XLSX.utils.encode_cell({ r, c: 1 })]; if (v && v.t === 'n') v.z = r === 1 ? '0.0000' : '0.00%'; }
+  });
+  XLSX.utils.book_append_sheet(wb, wsPrem, 'Premissas');
   const mem = [['Código', 'Produtor', 'Opção', 'Contribuição', 'Alíquota', 'Base', 'Valor/ano']];
-  for (const p of L) { const c = calcular(p); for (const [o, ls] of [['Comercialização', c.linhasC], ['Folha', c.semFolha ? [] : c.linhasF]]) for (const l of ls) mem.push([p.codigo, p.nome, o, l.nome, l.aliq, Math.round(l.baseValor), Math.round(l.valor)]); }
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(mem), 'Memória');
+  for (const p of L) { const c = calcular(p); for (const [o, ls] of [['Comercialização', c.linhasC], ['Folha', c.semFolha ? [] : c.linhasF]]) for (const l of ls) mem.push([p.codigo, p.nome, o, l.nome, l.aliq, l.baseValor, l.valor]); }
+  const wsMem = XLSX.utils.aoa_to_sheet(mem);
+  for (let r = 1; r < mem.length; r++) for (const [c, z] of [[4, '0.00%'], [5, '#,##0.00'], [6, '#,##0.00']]) { const cel = wsMem[XLSX.utils.encode_cell({ r, c })]; if (cel && cel.t === 'n') cel.z = z; }
+  wsMem['!cols'] = [8, 36, 16, 36, 10, 18, 16].map(wch => ({ wch }));
+  XLSX.utils.book_append_sheet(wb, wsMem, 'Memória');
   const json = JSON.stringify({ app: 'funrural-2027', v: 2, S });
   const pedacos = []; for (let i = 0; i < json.length; i += 30000) pedacos.push([json.slice(i, i + 30000)]);
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(pedacos), '_estado');
@@ -888,10 +917,42 @@ function aplicarArquivos(abertos) {
 /*MOTOR-END*/
 
 // ---------- formatação ----------
-const BRL0 = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+// Valores em reais sempre com 2 casas e vírgula (R$ 1.234,56); a líder pediu esse padrão em todos os campos.
+const BRL2 = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const NUM0 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
 const NUM2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const brl = v => BRL0.format(Math.round(v || 0));
+const NUM4 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+const brl = v => BRL2.format(r2(v));
+const dinheiro = v => NUM2.format(r2(v));   // sem o "R$", para os campos de digitação
+
+// ---------- ordem e busca ----------
+const colacao = new Intl.Collator('pt-BR', { sensitivity: 'base', numeric: true, ignorePunctuation: true });
+const semAcento = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const codigoNum = p => parseInt(String(p.codigo).replace(/\D/g, ''), 10) || 0;
+const porCodigo = (a, b) => codigoNum(a) - codigoNum(b) || String(a.codigo).localeCompare(String(b.codigo));
+function porNome(a, b) {   // A a Z sem diferenciar acento nem maiúscula; sem nome vai para o fim
+  const na = String(a.nome || '').trim(), nb = String(b.nome || '').trim();
+  if (!na !== !nb) return na ? -1 : 1;
+  return colacao.compare(na, nb) || porCodigo(a, b);
+}
+function porNomeDesc(a, b) {   // Z a A; quem não tem nome continua no fim
+  const na = String(a.nome || '').trim(), nb = String(b.nome || '').trim();
+  if (!na !== !nb) return na ? -1 : 1;
+  return colacao.compare(nb, na) || porCodigo(a, b);
+}
+// busca: ignora acento e maiúscula; todas as palavras digitadas precisam aparecer (em qualquer ordem) no código, no nome ou no CPF/CNPJ
+function combinaBusca(p, q) {
+  if (!q) return true;
+  const alvo = semAcento(`${p.codigo} ${p.nome} ${p.doc || ''}`) + ' ' + soDigitos(p.doc);
+  return q.split(/\s+/).every(w => alvo.includes(w));
+}
+const ORDENS = {
+  nome: { rot: 'Nome (A a Z)', f: (a, b) => porNome(a[0], b[0]) },
+  'nome-desc': { rot: 'Nome (Z a A)', f: (a, b) => porNomeDesc(a[0], b[0]) },
+  codigo: { rot: 'Código no Domínio', f: (a, b) => porCodigo(a[0], b[0]) },
+  receita: { rot: 'Maior receita prevista', f: (a, b) => b[1].R - a[1].R || porNome(a[0], b[0]) },
+  economia: { rot: 'Maior economia ao mudar', f: (a, b) => (b[1].mudar ? b[1].ganho : 0) - (a[1].mudar ? a[1].ganho : 0) || porNome(a[0], b[0]) }
+};
 const pct = (v, d = 2) => `${(100 * (v || 0)).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d })}%`;
 const esc = s => String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 function lerValor(txt) {
@@ -907,7 +968,7 @@ let toastT = null;
 function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 6500); }
 
 const CHAVE = 'datacon-funrural-2027:v1';
-let UI = { aba: 'consolidado', filtro: 'todos', busca: '', sel: null };
+let UI = { aba: 'consolidado', filtro: 'todos', busca: '', buscaCli: '', ordem: 'nome', sel: null };
 function salvarLocal() { try { localStorage.setItem(CHAVE, JSON.stringify(S)); } catch (e) { /* navegador sem armazenamento */ } }
 function lerLocal() { try { const t = localStorage.getItem(CHAVE); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
 
@@ -939,7 +1000,7 @@ function renderConsolidado() {
   const f = S.fontes;
   document.getElementById('fontes').textContent = S.exemplo ? 'Exemplo' : [`Fiscal: ${f.ctl || 'não carregada'}`, `Faturamento: ${f.fat || 'não carregado'}`, `Folha: ${f.enc || 'não carregada'}`].join(' · ');
 
-  const q = UI.busca.trim().toLowerCase();
+  const q = semAcento(UI.busca).trim();
   const base = UI.filtro === 'excluidos' ? lista().filter(p => p.excluido || vinculadoA(p.codigo)) : at;
   let linhas = base.map(p => [p, calcular(p)]);
   if (UI.filtro === 'mudar') linhas = linhas.filter(([, c]) => c.mudar);
@@ -947,9 +1008,20 @@ function renderConsolidado() {
   if (UI.filtro === 'folha') linhas = linhas.filter(([p]) => p.origem === 'folha');
   if (UI.filtro === 'semreceita') linhas = linhas.filter(([, c]) => c.semReceita);
   if (UI.filtro === 'apresentar') linhas = linhas.filter(([p]) => p.status === 'A apresentar');
-  if (q) linhas = linhas.filter(([p]) => (p.codigo + ' ' + p.nome).toLowerCase().includes(q));
+  if (q) linhas = linhas.filter(([p]) => combinaBusca(p, q));
+  if (!ORDENS[UI.ordem]) UI.ordem = 'nome';
+  linhas.sort(ORDENS[UI.ordem].f);
+  document.getElementById('ordem').innerHTML = Object.entries(ORDENS).map(([k, o]) => `<option value="${k}" ${UI.ordem === k ? 'selected' : ''}>${o.rot}</option>`).join('');
+  document.getElementById('contagem').textContent = (q || UI.filtro !== 'todos') ? `${linhas.length} de ${base.length} produtores` : `${base.length} produtores`;
 
-  const cab = `<thead><tr><th>Cód.</th><th>Produtor</th><th>PF/PJ</th><th>Opção atual</th><th class="n">Receita prevista 2027</th><th class="n">Folha média mensal</th><th class="n">Custo comercialização</th><th class="n">Custo folha</th><th>Menor custo</th><th class="n">Economia ao mudar</th><th>Status</th><th>Decisão 2027</th><th></th></tr></thead>`;
+  // cabeçalhos que ordenam; o de Produtor alterna entre A a Z e Z a A
+  const ordTh = (rot, chave, cls = '') => {
+    const ativa = UI.ordem === chave || (chave === 'nome' && UI.ordem === 'nome-desc');
+    const seta = !ativa ? '' : (UI.ordem === 'nome-desc' ? '▼' : '▲');
+    const sort = !ativa ? 'none' : (UI.ordem === 'nome-desc' ? 'descending' : 'ascending');
+    return `<th class="${cls}" aria-sort="${sort}"><button type="button" class="th-ord" data-ordem="${chave}" title="Clique para ordenar">${rot}<span class="seta">${seta}</span></button></th>`;
+  };
+  const cab = `<thead><tr>${ordTh('Cód.', 'codigo')}${ordTh('Produtor', 'nome')}<th>PF/PJ</th><th>Opção atual</th>${ordTh('Receita prevista 2027', 'receita', 'n')}<th class="n">Folha média mensal</th><th class="n">Custo comercialização</th><th class="n">Custo folha</th><th>Menor custo</th>${ordTh('Economia ao mudar', 'economia', 'n')}<th>Status</th><th>Decisão 2027</th><th></th></tr></thead>`;
   if (!linhas.length) {
     const vazio = !Object.keys(S.produtores).length ? 'Nenhum produtor identificado. Carregue a planilha de controle do Fiscal e o Encargos da Empresa.' : (UI.filtro === 'excluidos' ? 'Nenhum produtor fora da lista.' : 'Nenhum produtor neste filtro.');
     document.getElementById('tabela').innerHTML = cab + `<tbody><tr><td colspan="13" class="vazio">${vazio}</td></tr></tbody>`;
@@ -966,8 +1038,8 @@ function renderConsolidado() {
       <td><select data-campo="opcaoAtual" aria-label="Opção atual">
         <option value="" ${!p.opcaoAtual ? 'selected' : ''}>${padrao}</option>
         <option value="C" ${p.opcaoAtual === 'C' ? 'selected' : ''}>Comercialização</option><option value="F" ${p.opcaoAtual === 'F' ? 'selected' : ''}>Folha</option></select></td>
-      <td class="n"><input class="cel-input ${p.receitaPrev !== null ? 'editado' : ''}" data-campo="receitaPrev" inputmode="decimal" value="${NUM0.format(Math.round(c.R))}" aria-label="Receita prevista 2027" title="${p.receitaPrev !== null ? 'Editado. Domínio: ' + brl(receitaBase(p)) : 'Do Domínio' + (p.fat ? ' (' + esc(p.fat.periodo) + ')' : '')}"></td>
-      <td class="n"><input class="cel-input ${p.mediaFolha !== null ? 'editado' : ''}" data-campo="mediaFolha" inputmode="decimal" value="${NUM0.format(Math.round(c.M))}" aria-label="Folha média mensal" title="${p.mediaFolha !== null ? 'Editado. Domínio: ' + brl(mediaBase(p)) : (encsDe(p).length ? 'Do Domínio: ' + NUM0.format(empregados(p)) + ' empregados' : 'Sem folha no Domínio')}"></td>
+      <td class="n"><input class="cel-input ${p.receitaPrev !== null ? 'editado' : ''}" data-campo="receitaPrev" inputmode="decimal" value="${dinheiro(c.R)}" aria-label="Receita prevista 2027" title="${p.receitaPrev !== null ? 'Editado. Domínio: ' + brl(receitaBase(p)) : 'Do Domínio' + (p.fat ? ' (' + esc(p.fat.periodo) + ')' : '')}"></td>
+      <td class="n"><input class="cel-input ${p.mediaFolha !== null ? 'editado' : ''}" data-campo="mediaFolha" inputmode="decimal" value="${dinheiro(c.M)}" aria-label="Folha média mensal" title="${p.mediaFolha !== null ? 'Editado. Domínio: ' + brl(mediaBase(p)) : (encsDe(p).length ? 'Do Domínio: ' + NUM0.format(empregados(p)) + ' empregados' : 'Sem folha no Domínio')}"></td>
       <td class="n">${brl(c.custoC)}</td>
       <td class="n">${c.semFolha ? '<span class="muted">não se aplica</span>' : brl(c.custoF)}</td>
       <td>${c.semReceita ? '<span class="pill n">Sem receita</span>' : `<span class="pill ${c.melhor === 'F' ? 'f' : 'c'}">${OPC[c.melhor]}</span>`}</td>
@@ -1005,8 +1077,16 @@ window.addEventListener('afterprint', () => {
 function renderCliente() {
   const at = ativos();
   const sel = document.getElementById('sel-produtor');
-  if (!UI.sel || !S.produtores[UI.sel]) UI.sel = at.length ? at[0].codigo : null;
-  sel.innerHTML = at.map(p => `<option value="${esc(p.codigo)}" ${p.codigo === UI.sel ? 'selected' : ''}>${esc(p.codigo)} · ${esc(p.nome)}</option>`).join('');
+  // lista em ordem alfabética; a busca filtra por qualquer parte do nome e já escolhe o primeiro resultado
+  const q = semAcento(UI.buscaCli).trim();
+  const ordenados = at.slice().sort(porNome);
+  const achados = ordenados.filter(p => combinaBusca(p, q));
+  if (!UI.sel || !S.produtores[UI.sel]) UI.sel = ordenados.length ? ordenados[0].codigo : null;
+  else if (q && achados.length && !achados.some(p => p.codigo === UI.sel)) UI.sel = achados[0].codigo;
+  sel.innerHTML = achados.length
+    ? achados.map(p => `<option value="${esc(p.codigo)}" ${p.codigo === UI.sel ? 'selected' : ''}>${esc(p.nome || '(sem nome)')} · ${esc(p.codigo)}</option>`).join('')
+    : '<option value="" disabled selected>Nenhum produtor encontrado</option>';
+  document.getElementById('cont-cli').textContent = q ? `${achados.length} de ${ordenados.length}` : `${ordenados.length} produtores`;
   const caixa = document.getElementById('folha-cliente');
   if (!UI.sel) { caixa.innerHTML = '<div class="folha-cliente vazio">Carregue os arquivos para escolher um produtor.</div>'; document.getElementById('ficha').innerHTML = ''; document.getElementById('alertas').innerHTML = ''; return; }
   const p = S.produtores[UI.sel];
@@ -1031,13 +1111,13 @@ function renderCliente() {
     </div>
     <div class="premissas-cli">
       <div class="campo"><label class="label" for="cli-receita">Receita bruta prevista para 2027</label>
-        <input id="cli-receita" inputmode="decimal" value="${NUM0.format(Math.round(receita(p)))}">
+        <input id="cli-receita" inputmode="decimal" value="${dinheiro(receita(p))}">
         <span class="ref">${p.fat ? `Faturado no Domínio: ${brl(p.fat.total)} (${esc(p.fat.periodo)})` : 'Sem faturamento no Domínio'}</span></div>
       <div class="campo"><label class="label" for="cli-folha">Folha de pagamento média por mês</label>
-        <input id="cli-folha" inputmode="decimal" value="${NUM0.format(Math.round(media(p)))}">
+        <input id="cli-folha" inputmode="decimal" value="${dinheiro(media(p))}">
         <span class="ref">${mediaBase(p) ? `Média no Domínio: ${brl(mediaBase(p))} · ${NUM0.format(empregados(p))} empregados` : 'Sem folha no Domínio'}</span></div>
       <div class="campo"><label class="label" for="cli-gilrat">GILRAT da atividade</label>
-        <select id="cli-gilrat">${[0.01, 0.02, 0.03].map(v => `<option value="${v}" ${Math.abs(gilrat(p) - v) < 1e-9 ? 'selected' : ''}>${pct(v, 0)}</option>`).join('')}</select>
+        <select id="cli-gilrat">${[0.01, 0.02, 0.03].map(v => `<option value="${v}" ${Math.abs(gilrat(p) - v) < 1e-9 ? 'selected' : ''}>${pct(v)}</option>`).join('')}</select>
         <span class="ref">Grau de risco do CNAE (1%, 2% ou 3%)</span></div>
     </div>
     <div id="cli-resultado" style="display:grid;gap:22px"></div>
@@ -1077,7 +1157,7 @@ function renderResultadoCliente() {
   if (c.semReceita) veredito = 'Informe a receita bruta prevista para 2027 para comparar as duas opções.';
   else if (c.semFolha) veredito = 'Sem empregados, o Funrural é pago sobre a comercialização.';
   else if (c.dif < 1) veredito = 'As duas opções custam o mesmo com estes números.';
-  else veredito = `Pagar sobre a <b>${c.melhor === 'F' ? 'folha de pagamento' : 'comercialização'}</b> custa <span class="eco">${brl(c.dif)} a menos</span> em 2027 (${pct(c.dif / Math.max(c.custoC, c.custoF), 0)}).`;
+  else veredito = `Pagar sobre a <b>${c.melhor === 'F' ? 'folha de pagamento' : 'comercialização'}</b> custa <span class="eco">${brl(c.dif)} a menos</span> em 2027 (${pct(c.dif / Math.max(c.custoC, c.custoF))}).`;
   let eq = '';
   if (!c.semFolha && c.mEq !== null && c.mEq > 0) {
     const topo = Math.max(c.M, c.mEq) * 1.6;
@@ -1090,7 +1170,7 @@ function renderResultadoCliente() {
         <div class="ponto eq" style="left:${pos(c.mEq)}%"><i></i></div>
         <div class="ponto" style="left:${pos(c.M)}%"><i></i></div>
       </div>
-      <div class="escala-rot"><span>R$ 0</span><span class="leg"><i class="sw eq"></i>Equilíbrio ${brl(c.mEq)}</span><span class="leg"><i class="sw"></i>Hoje ${brl(c.M)}</span><span>${brl(topo)}</span></div>
+      <div class="escala-rot"><span>${brl(0)}</span><span class="leg"><i class="sw eq"></i>Equilíbrio ${brl(c.mEq)}</span><span class="leg"><i class="sw"></i>Hoje ${brl(c.M)}</span><span>${brl(topo)}</span></div>
     </div>`;
   }
   // Cada base aparece separada: as contribuições sobre a folha somam uma alíquota, e as que incidem sobre a receita
@@ -1125,7 +1205,7 @@ function renderResultadoCliente() {
     ${eq}
     <div class="memoria">
       ${tabela('Comercialização: como chegamos ao valor', c.linhasC, c.custoC)}
-      ${c.semFolha ? '' : tabela(`Folha: média de ${brl(c.M)} × ${NUM2.format(S.premissas.multFolha)} = ${brl(c.W)} por ano`, c.linhasF, c.custoF)}
+      ${c.semFolha ? '' : tabela(`Folha: média de ${brl(c.M)} × ${NUM4.format(S.premissas.multFolha)} = ${brl(c.W)} por ano`, c.linhasF, c.custoF)}
     </div>`;
   document.getElementById('alertas').innerHTML = alertas(p, c).map(a => `<div class="${a.n}">${esc(a.t)}</div>`).join('');
 }
@@ -1156,7 +1236,7 @@ function renderPremissas() {
   const pr = S.premissas;
   const linhas = k => pr[k].map((l, i) => `<tr>
       <td>${esc(l.nome)}<div class="fonte">${esc(l.fonte || '')}</div></td>
-      <td class="n">${l.gilrat ? '<span class="muted small">do produtor</span>' : `<input data-prem="${k}.${i}.aliq" inputmode="decimal" value="${(100 * l.aliq).toLocaleString('pt-BR', { maximumFractionDigits: 4 })}" aria-label="Alíquota em %">%`}</td>
+      <td class="n">${l.gilrat ? '<span class="muted small">do produtor</span>' : `<input data-prem="${k}.${i}.aliq" inputmode="decimal" value="${(100 * l.aliq).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}" aria-label="Alíquota em %">%`}</td>
       <td>${l.base === 'receita' ? 'Receita' : 'Folha'}</td>
       <td><select data-prem="${k}.${i}.incide" aria-label="Em qual opção incide"><option value="C" ${l.incide === 'C' ? 'selected' : ''}>Só na comercialização</option><option value="F" ${l.incide === 'F' ? 'selected' : ''}>Só na folha</option><option value="CF" ${l.incide === 'CF' ? 'selected' : ''}>Nas duas</option></select></td>
     </tr>`).join('');
@@ -1166,9 +1246,9 @@ function renderPremissas() {
       <h2>Premissas do cálculo</h2>
       <p class="muted">Reproduzem a planilha "Planejamento Tributário Funrural" do escritório, revisada com o contador em 05/11/2026. Mude só se a lei mudar; a mudança vale para todos os produtores e entra no Excel.</p>
       <div class="gerais">
-        <div class="campo"><label class="label" for="pr-mult">Folha anual = média mensal ×</label><input id="pr-mult" inputmode="decimal" value="${NUM2.format(pr.multFolha)}"><span class="ref">13,33 = 12 meses + 13º + 1/3 de férias</span></div>
-        <div class="campo"><label class="label" for="pr-gilrat">GILRAT padrão</label><select id="pr-gilrat">${[0.01, 0.02, 0.03].map(v => `<option value="${v}" ${Math.abs(pr.gilratPadrao - v) < 1e-9 ? 'selected' : ''}>${pct(v, 0)}</option>`).join('')}</select><span class="ref">Padrão do escritório para o produtor rural</span></div>
-        <div class="campo"><label class="label" for="pr-margem">Diferença mínima para sinalizar mudança</label><input id="pr-margem" inputmode="decimal" value="${(100 * pr.margem).toLocaleString('pt-BR')}"><span class="ref">% do custo atual; só afeta o filtro "Mudar compensa"</span></div>
+        <div class="campo"><label class="label" for="pr-mult">Folha anual = média mensal ×</label><input id="pr-mult" inputmode="decimal" value="${NUM4.format(pr.multFolha)}"><span class="ref">13,3333 = 12 meses + 13º + 1/3 de férias (usado sem arredondar)</span></div>
+        <div class="campo"><label class="label" for="pr-gilrat">GILRAT padrão</label><select id="pr-gilrat">${[0.01, 0.02, 0.03].map(v => `<option value="${v}" ${Math.abs(pr.gilratPadrao - v) < 1e-9 ? 'selected' : ''}>${pct(v)}</option>`).join('')}</select><span class="ref">Padrão do escritório para o produtor rural</span></div>
+        <div class="campo"><label class="label" for="pr-margem">Diferença mínima para sinalizar mudança</label><input id="pr-margem" inputmode="decimal" value="${(100 * pr.margem).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}"><span class="ref">% do custo atual; só afeta o filtro "Mudar compensa"</span></div>
         <div class="campo"><span class="label">Restaurar</span><button class="btn" type="button" id="pr-restaurar">Restaurar o padrão da planilha</button></div>
       </div>
     </div>
@@ -1244,6 +1324,14 @@ document.addEventListener('drop', e => { e.preventDefault(); document.body.class
 document.querySelectorAll('[role=tab]').forEach(b => { b.onclick = () => { UI.aba = b.dataset.aba; render(); }; });
 
 $('busca').oninput = e => { UI.busca = e.target.value; renderConsolidado(); };
+$('ordem').onchange = e => { UI.ordem = e.target.value; renderConsolidado(); };
+$('busca-cliente').oninput = e => { UI.buscaCli = e.target.value; renderCliente(); };
+$('tabela').addEventListener('click', e => {
+  const b = e.target.closest('[data-ordem]'); if (!b) return;
+  const k = b.dataset.ordem;
+  UI.ordem = k === 'nome' ? (UI.ordem === 'nome' ? 'nome-desc' : 'nome') : k;
+  renderConsolidado();
+});
 $('chips').onclick = e => { const b = e.target.closest('[data-filtro]'); if (b) { UI.filtro = b.dataset.filtro; renderConsolidado(); } };
 function aplicaCampo(p, k, valor) {
   if (k === 'receitaPrev' || k === 'mediaFolha') p[k] = lerValor(valor);
@@ -1256,7 +1344,7 @@ $('tabela').addEventListener('change', e => {
   const p = S.produtores[tr.dataset.cod], k = el.dataset.campo; if (!p || !k) return;
   aplicaCampo(p, k, el.value); mudou();
 });
-$('tabela').addEventListener('click', e => { const b = e.target.closest('[data-abrir]'); if (b) { UI.sel = b.dataset.abrir; UI.aba = 'cliente'; render(); window.scrollTo(0, 0); } });
+$('tabela').addEventListener('click', e => { const b = e.target.closest('[data-abrir]'); if (b) { UI.sel = b.dataset.abrir; UI.buscaCli = ''; $('busca-cliente').value = ''; UI.aba = 'cliente'; render(); window.scrollTo(0, 0); } });
 
 $('sel-produtor').onchange = e => { UI.sel = e.target.value; renderCliente(); };
 $('v-cliente').addEventListener('input', e => {
@@ -1268,7 +1356,7 @@ $('v-cliente').addEventListener('change', e => {
   const p = S.produtores[UI.sel]; if (!p) return;
   const el = e.target;
   if (el.id === 'cli-gilrat') { p.gilrat = parseFloat(el.value); salvarLocal(); renderResultadoCliente(); return; }
-  if (el.id === 'cli-receita' || el.id === 'cli-folha') { el.value = NUM0.format(Math.round(el.id === 'cli-receita' ? receita(p) : media(p))); return; }
+  if (el.id === 'cli-receita' || el.id === 'cli-folha') { el.value = dinheiro(el.id === 'cli-receita' ? receita(p) : media(p)); return; }
   const k = el.dataset.fcampo; if (!k) return;
   aplicaCampo(p, k, el.value); mudou(false); renderCliente();
 });
