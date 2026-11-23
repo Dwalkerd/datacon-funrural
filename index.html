@@ -306,7 +306,7 @@ body.modo-cliente { background: #f4f6f7; }
   <div class="wrap">
     <div class="marca">
       <h1>Funrural 2027</h1>
-      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 23/11/2026 17:08</span></span>
+      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 23/11/2026 18:14</span></span>
     </div>
     <span class="privado" title="A página lê os arquivos no seu computador. Nada é enviado para servidor.">Dados só neste navegador</span>
     <div class="acoes">
@@ -414,6 +414,7 @@ body.modo-cliente { background: #f4f6f7; }
         <ul>
           <li><b>Planilha do Fiscal:</b> entram as linhas com "Sobre a folha", "Sobre faturamento" ou "Micro produtor", com a opção registrada.</li>
           <li><b>Folha:</b> entram também os empregadores rurais que não estão na planilha, pelo percentual de terceiros que o Domínio calcula. Cerca de 0,2% indica produtor PF; 5,2% indica produtor PJ que paga sobre a folha; perto de 2,7% indica provável PJ que paga sobre a venda.</li>
+          <li><b>Confirmados pela líder:</b> empresas que a planilha do Fiscal traz como lucro presumido ou lucro real, sem a opção do Funrural, e que não têm folha. A líder confirmou em 23/11/2026 que devem estar na base, então a página as inclui sempre que o código aparece nos arquivos. Têm o filtro "Confirmados pela líder". Quem não tem faturamento no período aparece como "Sem receita".</li>
           <li><b>Empregados em outro código:</b> quando outro código da Folha tem o mesmo nome do produtor, a página soma a folha dele ao produtor.</li>
           <li>A opção atual é a da planilha do Fiscal; sem ela, a que a Folha calcula (com os 20% sobre a folha, é folha).</li>
         </ul>
@@ -629,6 +630,12 @@ const OPC = { C: 'Comercialização', F: 'Folha' };
 const STATUS = ['A apresentar', 'Apresentado', 'Decidido', 'Não se aplica'];
 const PRODUTOR_TRIB = { 'SOBRE A FOLHA': 'F', 'SOBRE FATURAMENTO': 'C', 'MICRO PRODUTOR': 'C' };
 const PJ_NOME = /\b(LTDA|S\/?A|S\.A\.|EIRELI|EPP)\b/i;
+// Produtores que a líder confirmou em 23/11/2026 e que a página não achava: a coluna "Tributação / Funrural" da planilha do
+// Fiscal traz o regime (Lucro presumido ou real) e eles não têm sinal na Folha. Entram sempre que aparecem nos arquivos
+// carregados, com os dados do Domínio. Só códigos: nome e CNPJ vêm dos relatórios, no computador de quem usa.
+// Quando o Fiscal passar a marcar a opção do Funrural na planilha (ou houver a fonte por CNAE), esta lista deixa de crescer.
+const CONFIRMADOS = ['598', '249', '735', '138', '99', '754', '582', '603', '485', '602', '535', '755'];
+const CONFIRMADOS_VERSAO = '2026-11-23';
 const CAMPOS_USUARIO = ['receitaPrev', 'mediaFolha', 'gilrat', 'opcaoAtual', 'folhaDe', 'folhaAutoOff', 'status', 'decisao', 'obs', 'excluido', 'pessoaManual'];
 
 let S = estadoInicial();
@@ -689,6 +696,15 @@ function reconstruir() {
     const pj = soDigitos(c.doc).length === 14 && PJ_NOME.test(c.nome);
     cria(c.codigo, { nome: c.nome, doc: c.doc, pessoa: pj ? 'PJ' : 'PF', origem: 'controle', tribCtl: c.trib, opcaoCtl: PRODUTOR_TRIB[c.trib] });
   }
+  // 1b. produtores confirmados pela líder que a planilha do Fiscal não marca como Funrural (o código precisa aparecer em algum arquivo)
+  for (const codigo of CONFIRMADOS) {
+    if (novos[codigo]) continue;
+    const c = B.ctl[codigo], f = B.fat[codigo], e = B.enc[codigo];
+    if (!c && !f && !e) continue;
+    if (c && /INATIV|BAIXAD|ENCERR/.test(c.status)) continue;
+    const doc = (c && c.doc) || (f && f.doc) || '';
+    cria(codigo, { nome: (c && c.nome) || (f && f.nome) || (e && e.nome) || '', doc, pessoa: soDigitos(doc).length === 14 ? 'PJ' : 'PF', origem: 'confirmado', tribCtl: c ? c.trib : '' });
+  }
   // 2. empregadores rurais da Folha que não estão na planilha
   if (temEnc) for (const e of Object.values(B.enc)) {
     if (novos[e.codigo]) continue;
@@ -716,6 +732,7 @@ function reconstruir() {
     for (const p of Object.values(novos)) String(p.folhaDe || '').split(/[\s,;]+/).filter(Boolean).forEach(c => manter.add(c));
     for (const k of ['fat', 'enc', 'ctl']) for (const c of Object.keys(B[k])) if (!manter.has(c)) delete B[k][c];
   }
+  S.confirmadosEm = CONFIRMADOS_VERSAO;   // marca que a lista foi montada já com os confirmados
 }
 
 // ---------- cálculo ----------
@@ -790,6 +807,10 @@ function alertas(p, c) {
   if (c.suspeita) a.push({ n: 'crit', t: `${c.suspeita} A comparação fica fora da soma de economia até a conferência.` });
   if (c.atual === 'F' && c.semFolha)
     a.push({ n: 'crit', t: 'Opção pela folha sem folha no Encargos. Sem empregado, a opção pela folha não é permitida (SC Cosit 286/2019). Se os empregados estão em outro código com nome diferente, informe-o em "Somar a folha do código".' });
+  if (p.origem === 'confirmado')
+    a.push({ n: 'info', t: `Incluído por confirmação da líder (23/11/2026). A planilha do Fiscal traz ${p.tribCtl ? p.tribCtl.toLowerCase() : 'outra classificação'} na coluna do Funrural, sem a opção escolhida: confirme a opção atual antes de apresentar.` });
+  if (c.semFolha && c.R > 20e6)
+    a.push({ n: 'warn', t: 'Receita muito alta e nenhuma folha: confira se o Demonstrativo inclui remessas, transferências ou vendas que não são da produção rural própria. A base do Funrural é só a comercialização da produção.' });
   if (p.origem === 'folha' && p.sinal)
     a.push({ n: p.sinal.certeza ? 'info' : 'warn', t: `Identificado pela Folha: ${p.sinal.rotulo}. ${p.tribCtl ? `Na planilha do Fiscal está como ${p.tribCtl.toLowerCase()}.` : 'Não está na planilha do Fiscal.'}${p.sinal.certeza ? '' : ' É uma inferência: confirme a classificação na Folha.'}` });
   const auto = p.folhaAutoOff ? [] : (p.folhaAuto || []);
@@ -811,7 +832,7 @@ function linhaExcel(p) {
   const c = calcular(p), dom = opcaoDominio(p);
   return {
     'Código': p.codigo, 'Produtor': p.nome, 'PF/PJ': p.pessoa,
-    'Origem': p.origem === 'controle' ? `Planilha do Fiscal: ${p.tribCtl.toLowerCase()}` : (p.sinal ? `Folha: ${p.sinal.rotulo}` : ''),
+    'Origem': p.origem === 'controle' ? `Planilha do Fiscal: ${p.tribCtl.toLowerCase()}` : (p.origem === 'confirmado' ? `Confirmado pela líder em 23/11/2026${p.tribCtl ? ` (planilha do Fiscal: ${p.tribCtl.toLowerCase()})` : ''}` : (p.sinal ? `Folha: ${p.sinal.rotulo}` : '')),
     'Opção atual': c.atual ? OPC[c.atual] : '', 'Opção calculada no Domínio': dom ? OPC[dom] : 'sem folha',
     'Faturado no período': p.fat ? p.fat.total : '', 'Período do faturamento': p.fat ? p.fat.periodo : '',
     'Receita prevista 2027': c.R, 'Receita editada': p.receitaPrev !== null ? 'sim' : 'não',
@@ -976,6 +997,7 @@ function lerLocal() { try { const t = localStorage.getItem(CHAVE); return t ? JS
 // ---------- render: consolidado ----------
 function origemTexto(p) {
   if (p.origem === 'controle') return `Planilha do Fiscal: ${p.tribCtl.toLowerCase()}`;
+  if (p.origem === 'confirmado') return `Confirmado pela líder${p.tribCtl ? ` · planilha do Fiscal: ${p.tribCtl.toLowerCase()}` : ''}`;
   if (p.sinal) return `Pela Folha: ${p.sinal.rotulo}`;
   return '';
 }
@@ -996,7 +1018,7 @@ function renderConsolidado() {
     <div class="kpi"><span class="label">Apresentados</span><span class="v">${apres} <span style="font-size:1rem;color:var(--ink-2)">de ${at.length}</span></span><span class="s">${decid} com decisão registrada</span></div>
     <div class="kpi ${comAlerta ? 'alerta' : ''}"><span class="label">Conferir antes</span><span class="v">${comAlerta}</span><span class="s">opção divergente, folha sem empregado ou dado incompleto${semRec ? ` · ${semRec} sem receita no Domínio` : ''}</span></div>`;
 
-  const filtros = [['todos', 'Todos'], ['mudar', 'Mudar compensa'], ['alerta', 'Conferir antes'], ['semreceita', 'Sem receita'], ['folha', 'Achados pela Folha'], ['apresentar', 'A apresentar'], ['excluidos', 'Fora da lista']];
+  const filtros = [['todos', 'Todos'], ['mudar', 'Mudar compensa'], ['alerta', 'Conferir antes'], ['semreceita', 'Sem receita'], ['folha', 'Achados pela Folha'], ['confirmado', 'Confirmados pela líder'], ['apresentar', 'A apresentar'], ['excluidos', 'Fora da lista']];
   document.getElementById('chips').innerHTML = filtros.map(([k, t]) => `<button class="chip" type="button" data-filtro="${k}" aria-pressed="${UI.filtro === k}">${t}</button>`).join('');
   const f = S.fontes;
   document.getElementById('fontes').textContent = S.exemplo ? 'Exemplo' : [`Fiscal: ${f.ctl || 'não carregada'}`, `Faturamento: ${f.fat || 'não carregado'}`, `Folha: ${f.enc || 'não carregada'}`].join(' · ');
@@ -1007,6 +1029,7 @@ function renderConsolidado() {
   if (UI.filtro === 'mudar') linhas = linhas.filter(([, c]) => c.mudar);
   if (UI.filtro === 'alerta') linhas = linhas.filter(([p, c]) => temCrit(p, c));
   if (UI.filtro === 'folha') linhas = linhas.filter(([p]) => p.origem === 'folha');
+  if (UI.filtro === 'confirmado') linhas = linhas.filter(([p]) => p.origem === 'confirmado');
   if (UI.filtro === 'semreceita') linhas = linhas.filter(([, c]) => c.semReceita);
   if (UI.filtro === 'apresentar') linhas = linhas.filter(([p]) => p.status === 'A apresentar');
   if (q) linhas = linhas.filter(([p]) => combinaBusca(p, q));
@@ -1272,9 +1295,13 @@ function render() {
   const faltam = S.exemplo ? [] : [['ctl', 'a planilha de controle do Fiscal (sem ela, ficam de fora os produtores sem empregados e a opção registrada)'], ['enc', 'o Encargos da Empresa (sem ele, não há folha nem conferência da opção)'], ['fat', 'o Demonstrativo Faturamento (sem ele, não há receita)']].filter(([k]) => !S.fontes[k]);
   const av = document.getElementById('aviso-faltam');
   const semCtl = faltam.some(([k]) => k === 'ctl');
-  av.hidden = !faltam.length;
+  // trabalho salvo antes de os produtores confirmados entrarem: o arquivo não guarda os dados deles, então é preciso recarregar os relatórios
+  const confirmadosPendentes = !S.exemplo && !faltam.length && Object.keys(S.produtores).length > 0 && S.confirmadosEm !== CONFIRMADOS_VERSAO;
+  av.hidden = !faltam.length && !confirmadosPendentes;
   av.classList.toggle('info', !semCtl);
-  av.innerHTML = !faltam.length ? '' : `<span><strong>${semCtl ? `Lista parcial: ${ativos().length} produtores, só os que têm empregados.` : 'Falta carregar:'}</strong> ${semCtl ? 'Arraste também ' : ''}${faltam.map(x => x[1]).join('; ')}.</span><button class="btn" type="button" data-carregar>Carregar arquivos</button>`;
+  av.innerHTML = faltam.length
+    ? `<span><strong>${semCtl ? `Lista parcial: ${ativos().length} produtores, só os que têm empregados.` : 'Falta carregar:'}</strong> ${semCtl ? 'Arraste também ' : ''}${faltam.map(x => x[1]).join('; ')}.</span><button class="btn" type="button" data-carregar>Carregar arquivos</button>`
+    : (confirmadosPendentes ? `<span><strong>Atualização:</strong> a lista agora inclui ${CONFIRMADOS.length} produtores confirmados pela líder. Carregue de novo os três relatórios do Domínio (Encargos, Demonstrativo e planilha do Fiscal) para trazer os dados deles. O que já foi editado fica guardado.</span><button class="btn" type="button" data-carregar>Carregar arquivos</button>` : '');
   document.querySelectorAll('[data-view]').forEach(v => { v.hidden = v.dataset.view !== UI.aba; });
   document.querySelectorAll('[role=tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.aba === UI.aba));
   if (UI.aba === 'consolidado') renderConsolidado();
