@@ -1,0 +1,1189 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex, nofollow"></head><body>
+<title>Funrural 2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: ficha de planejamento — barra de comando no topo, consolidado como planilha viva,
+   tela do cliente como comparativo de duas colunas que esconde todo o resto. */
+:root {
+  --bg: #f3f5f9;
+  --surface: #ffffff;
+  --surface-2: #eef2f8;
+  --ink: #131a26;
+  --ink-2: #4a5568;
+  --ink-3: #6b7689;
+  --line: #d8dee8;
+  --accent: #1e4f9c;
+  --accent-ink: #ffffff;
+  --accent-soft: #e2eaf7;
+  --bar-muted: #b9c6db;
+  --good: #1d7349;
+  --good-soft: #e1f2e8;
+  --warn: #9a5a00;
+  --warn-soft: #fbefd9;
+  --crit: #b3261e;
+  --crit-soft: #fbe4e1;
+  --font-display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e131b; --surface: #161d29; --surface-2: #1c2533; --ink: #e7ecf3; --ink-2: #a3aec0; --ink-3: #8390a5;
+    --line: #2b3546; --accent: #7aa3e6; --accent-ink: #0e131b; --accent-soft: #1d2c46; --bar-muted: #3a4a63;
+    --good: #5cc795; --good-soft: #15301f; --warn: #e3a84f; --warn-soft: #33270f; --crit: #f07a70; --crit-soft: #3a1714;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e131b; --surface: #161d29; --surface-2: #1c2533; --ink: #e7ecf3; --ink-2: #a3aec0; --ink-3: #8390a5;
+  --line: #2b3546; --accent: #7aa3e6; --accent-ink: #0e131b; --accent-soft: #1d2c46; --bar-muted: #3a4a63;
+  --good: #5cc795; --good-soft: #15301f; --warn: #e3a84f; --warn-soft: #33270f; --crit: #f07a70; --crit-soft: #3a1714;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--font-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: 1.6rem; font-weight: 750; }
+h2 { font-size: 1.3rem; font-weight: 700; }
+h3 { font-size: 1.02rem; font-weight: 650; }
+p { margin: 0; }
+.num, td.n, .tab { font-variant-numeric: tabular-nums; }
+.muted { color: var(--ink-2); }
+.small { font-size: 0.85rem; }
+.label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-3); font-weight: 600; }
+button, select, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* topo */
+.top { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
+.top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding-block: 12px; }
+.marca { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.marca .sub { color: var(--ink-2); font-size: 0.85rem; }
+.privado { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--good); background: var(--good-soft); padding: 3px 10px; border-radius: 99px; font-weight: 500; }
+.privado::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.acoes { margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 7px 14px; border-radius: var(--r); cursor: pointer; font-weight: 500; font-size: 0.9rem; white-space: nowrap; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.pri { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.pri:hover { filter: brightness(1.08); color: var(--accent-ink); }
+.btn.link { border-color: transparent; background: none; color: var(--accent); padding-inline: 6px; }
+.btn.perigo:hover { border-color: var(--crit); color: var(--crit); }
+.abas { display: flex; gap: 2px; overflow-x: auto; }
+.abas button { border: 0; background: none; padding: 10px 14px; cursor: pointer; color: var(--ink-2); font-weight: 500; border-bottom: 2px solid transparent; white-space: nowrap; }
+.abas button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.abas-faixa { background: var(--surface); border-bottom: 1px solid var(--line); }
+
+main.wrap { padding-block: 20px 48px; display: grid; gap: 20px; }
+.aviso { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 12px 16px; border-radius: var(--r); background: var(--warn-soft); color: var(--ink); border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); }
+.aviso strong { color: var(--warn); }
+.aviso.info { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.aviso.info strong { color: var(--accent); }
+.origem { display: block; font-weight: 400; color: var(--ink-3); font-size: 0.78rem; }
+.fluxo { counter-reset: passo; display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.fluxo > li { counter-increment: passo; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 4px 12px; }
+.fluxo > li::before { content: counter(passo); grid-row: span 3; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; }
+.fluxo h3 { align-self: center; }
+.arquivos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.arquivo { border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.arquivo .ok { color: var(--good); font-weight: 600; font-size: 0.82rem; }
+.arquivo .falta { color: var(--ink-3); font-size: 0.82rem; }
+@media (max-width: 900px) { .arquivos { grid-template-columns: 1fr; } }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: var(--r); font-size: 0.9rem; z-index: 20; max-width: min(640px, calc(100% - 32px)); box-shadow: 0 6px 24px rgba(0,0,0,.2); }
+
+/* indicadores */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 2px; min-width: 0; }
+.kpi .v { font-family: var(--font-display); font-stretch: 80%; font-size: 1.9rem; font-weight: 750; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.kpi .s { color: var(--ink-2); font-size: 0.85rem; }
+.kpi.destaque .v { color: var(--good); }
+.kpi.alerta .v { color: var(--crit); }
+
+/* barra de filtros */
+.filtros { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.filtros input[type=search] { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 7px 12px; min-width: 0; width: 260px; max-width: 100%; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 5px 12px; cursor: pointer; font-size: 0.85rem; }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+/* tabela */
+.tabela-caixa { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); font-weight: 600; background: var(--surface-2); white-space: nowrap; position: sticky; top: 0; }
+td.n, th.n { text-align: right; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+.nome { font-weight: 600; max-width: 260px; }
+.nome small { display: block; font-weight: 400; color: var(--ink-3); }
+.cel-input { width: 128px; border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; text-align: right; background: var(--surface); font-variant-numeric: tabular-nums; }
+.cel-input.editado { border-color: var(--accent); background: var(--accent-soft); }
+td select { border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; background: var(--surface); max-width: 170px; }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 0.76rem; font-weight: 600; white-space: nowrap; }
+.pill.c { background: var(--accent-soft); color: var(--accent); }
+.pill.f { background: var(--good-soft); color: var(--good); }
+.pill.n { background: var(--surface-2); color: var(--ink-2); }
+.pill.crit { background: var(--crit-soft); color: var(--crit); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.economia { color: var(--good); font-weight: 600; }
+.vazio { padding: 28px 16px; text-align: center; color: var(--ink-2); }
+
+/* tela do cliente */
+.cliente-topo { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; }
+.cliente-topo .sel { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.cliente-topo select { border: 1px solid var(--line); border-radius: var(--r); padding: 7px 10px; background: var(--surface); max-width: 100%; }
+.folha-cliente { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 24px; display: grid; gap: 22px; }
+.cab { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; align-items: flex-start; border-bottom: 1px solid var(--line); padding-bottom: 16px; }
+.cab .marca-dc { font-family: var(--font-display); font-stretch: 80%; font-weight: 800; letter-spacing: 0.06em; color: var(--accent); font-size: 0.9rem; }
+.cab h2 { font-size: 1.7rem; }
+.premissas-cli { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.campo { display: grid; gap: 4px; min-width: 0; }
+.campo input, .campo select { border: 1px solid var(--line); border-radius: var(--r); padding: 8px 10px; background: var(--surface); width: 100%; font-variant-numeric: tabular-nums; }
+.campo .ref { font-size: 0.8rem; color: var(--ink-3); }
+.opcoes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.opcao { border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: grid; gap: 6px; min-width: 0; }
+.opcao.vence { border-color: var(--good); box-shadow: inset 0 0 0 1px var(--good); }
+.opcao .titulo { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; }
+.opcao .valor { font-family: var(--font-display); font-stretch: 78%; font-weight: 780; font-size: 2.4rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.opcao .valor small { font-size: 1rem; font-weight: 600; color: var(--ink-2); font-stretch: 90%; }
+.barras { display: grid; gap: 10px; }
+.barra { display: grid; grid-template-columns: 150px minmax(0, 1fr) 120px; gap: 12px; align-items: center; }
+.barra .trilho { height: 22px; background: var(--surface-2); border-radius: 0 4px 4px 0; position: relative; }
+.barra .marca-b { height: 100%; border-radius: 0 4px 4px 0; background: var(--bar-muted); min-width: 2px; }
+.barra.vence .marca-b { background: var(--accent); }
+.barra .v { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.veredito { font-family: var(--font-display); font-stretch: 88%; font-size: 1.35rem; font-weight: 650; line-height: 1.3; }
+.veredito .eco { color: var(--good); }
+.equilibrio { display: grid; gap: 10px; background: var(--surface-2); border-radius: 8px; padding: 14px 16px; }
+.escala { position: relative; height: 34px; margin-inline: 8px; }
+.escala .linha { position: absolute; left: 0; right: 0; top: 14px; height: 6px; border-radius: 3px; background: linear-gradient(to right, var(--good-soft) var(--eq), var(--accent-soft) var(--eq)); border: 1px solid var(--line); }
+.escala .ponto { position: absolute; top: 4px; transform: translateX(-50%); display: grid; justify-items: center; }
+.escala .ponto i { width: 2px; height: 26px; background: var(--ink); display: block; }
+.escala .ponto.eq i, .sw.eq { background: repeating-linear-gradient(to bottom, var(--ink-3) 0 4px, transparent 4px 7px); }
+.leg { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 2px; height: 14px; display: inline-block; background: var(--ink); }
+.escala-rot { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--ink-2); gap: 8px; flex-wrap: wrap; }
+.memoria { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.memoria table { font-size: 0.85rem; }
+.memoria td, .memoria th { padding: 6px 8px; }
+.memoria tfoot td { font-weight: 700; border-top: 2px solid var(--line); }
+.memoria tr.subtotal td { border-top: 1px solid var(--line); background: var(--bg-soft, rgba(30, 79, 156, .06)); }
+.notas { display: grid; gap: 6px; font-size: 0.85rem; color: var(--ink-2); padding-left: 18px; margin: 0; }
+.rodape-cli { font-size: 0.8rem; color: var(--ink-3); border-top: 1px solid var(--line); padding-top: 12px; }
+.versao { font-size: 0.72rem; color: var(--ink-3); margin-left: 6px; white-space: nowrap; }
+.ficha { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 14px; }
+.ficha .grade { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.alertas { display: grid; gap: 6px; }
+.alertas div { padding: 8px 12px; border-radius: var(--r); font-size: 0.88rem; }
+.alertas .crit { background: var(--crit-soft); color: var(--ink); border-left: 3px solid var(--crit); }
+.alertas .warn { background: var(--warn-soft); color: var(--ink); border-left: 3px solid var(--warn); }
+.alertas .info { background: var(--surface-2); color: var(--ink); border-left: 3px solid var(--ink-3); }
+.sair-cliente { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 10; opacity: .55; }
+.sair-cliente:hover { opacity: 1; }
+body.modo-cliente .top, body.modo-cliente .abas-faixa, body.modo-cliente .so-equipe { display: none !important; }
+body.modo-cliente main.wrap { max-width: 1080px; }
+
+/* premissas e ajuda */
+.duas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.painel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.painel table input { width: 84px; border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; text-align: right; background: var(--surface); }
+.painel table select { border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; background: var(--surface); }
+.gerais { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.texto { max-width: 72ch; display: grid; gap: 10px; }
+.texto ol, .texto ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.passo { display: grid; gap: 8px; }
+.caminho { font-family: var(--font-display); font-stretch: 90%; font-weight: 600; color: var(--accent); }
+.fonte { font-size: 0.8rem; color: var(--ink-3); }
+.solta { border: 2px dashed var(--accent); }
+@media (max-width: 900px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ficha .grade, .gerais { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .duas, .memoria { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .opcoes, .premissas-cli { grid-template-columns: 1fr; }
+  .barra { grid-template-columns: 1fr; gap: 4px; }
+  .barra .v { text-align: left; }
+  .folha-cliente { padding: 16px; }
+  .acoes { margin-left: 0; }
+  .opcao .valor { font-size: 2rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="marca">
+      <h1>Funrural 2027</h1>
+      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 23/11/2026 16:31</span></span>
+    </div>
+    <span class="privado" title="A página lê os arquivos no seu computador. Nada é enviado para servidor.">Dados só neste navegador</span>
+    <div class="acoes">
+      <button class="btn pri" id="bt-carregar" type="button">Carregar arquivos</button>
+      <button class="btn" id="bt-abrir" type="button">Abrir Excel salvo</button>
+      <button class="btn" id="bt-baixar" type="button">Baixar Excel</button>
+    </div>
+    <input type="file" id="in-dominio" accept=".xls,.xlsx" multiple hidden>
+    <input type="file" id="in-salvo" accept=".xlsx" hidden>
+  </div>
+</header>
+<div class="abas-faixa">
+  <div class="wrap abas" role="tablist">
+    <button role="tab" id="tab-consolidado" data-aba="consolidado" aria-selected="true" type="button">Consolidado</button>
+    <button role="tab" id="tab-cliente" data-aba="cliente" aria-selected="false" type="button">Tela do cliente</button>
+    <button role="tab" id="tab-premissas" data-aba="premissas" aria-selected="false" type="button">Premissas</button>
+    <button role="tab" id="tab-ajuda" data-aba="ajuda" aria-selected="false" type="button">Passo a passo</button>
+  </div>
+</div>
+
+<main class="wrap" id="main">
+  <div class="aviso so-equipe" id="aviso-exemplo" hidden>
+    <span><strong>Dados de exemplo.</strong> Os produtores C01 a C04 são fictícios. Carregue os três arquivos (Encargos, Faturamento e planilha de controle do Fiscal) para ver a carteira real.</span>
+    <button class="btn" type="button" id="bt-carregar-2">Carregar arquivos</button>
+  </div>
+  <div class="aviso info so-equipe" id="aviso-faltam" hidden></div>
+
+  <section id="v-consolidado" data-view="consolidado">
+    <div style="display:grid;gap:16px">
+      <div class="kpis" id="kpis"></div>
+      <div class="filtros">
+        <input type="search" id="busca" placeholder="Buscar produtor ou código" aria-label="Buscar produtor ou código">
+        <div style="display:flex;flex-wrap:wrap;gap:6px" id="chips"></div>
+        <span class="muted small" id="fontes" style="margin-left:auto"></span>
+      </div>
+      <div class="tabela-caixa"><table id="tabela"></table></div>
+      <p class="fonte">Custos anuais estimados para 2027 com as premissas da aba Premissas. "Economia ao mudar" aparece quando a outra opção custa menos que a atual, acima da diferença mínima. Clique em "Abrir" para apresentar ao cliente.</p>
+    </div>
+  </section>
+
+  <section id="v-cliente" data-view="cliente" hidden>
+    <div style="display:grid;gap:16px">
+      <div class="cliente-topo so-equipe">
+        <div class="sel">
+          <label class="label" for="sel-produtor">Produtor</label>
+          <select id="sel-produtor"></select>
+        </div>
+        <button class="btn pri" type="button" id="bt-modo-cliente">Mostrar ao cliente</button>
+      </div>
+      <div class="alertas so-equipe" id="alertas"></div>
+      <div id="folha-cliente"></div>
+      <div class="ficha so-equipe" id="ficha"></div>
+    </div>
+  </section>
+
+  <section id="v-premissas" data-view="premissas" hidden>
+    <div style="display:grid;gap:16px" id="premissas"></div>
+  </section>
+
+  <section id="v-ajuda" data-view="ajuda" hidden>
+    <div style="display:grid;gap:16px">
+      <div class="painel">
+        <h2>Os três arquivos</h2>
+        <p class="muted">A página precisa só destes arquivos. Ela separa sozinha quem é produtor, traz o nome de cada cliente e faz a conta. Não é preciso marcar empresa nem digitar nada.</p>
+        <div class="arquivos" id="status-arquivos"></div>
+      </div>
+      <div class="duas">
+        <div class="painel texto">
+          <h2>No Domínio</h2>
+          <ol class="fluxo">
+            <li><h3>Encargos da Empresa</h3>
+              <p class="caminho">Domínio Folha › Relatórios › Encargos › Empresa</p>
+              <p>Competência dos últimos 12 meses fechados (ou de 01/2026 até o último mês fechado). Tipo da folha <b>Mensal</b>, modelo <b>Analítico</b>, marque <b>Emitir código da empresa</b>. No botão <b>Empresas…</b>, marque <b>todas</b>. Emita e salve em Excel (.xls).</p></li>
+            <li><h3>Demonstrativo Faturamento</h3>
+              <p class="caminho">Domínio Escrita Fiscal › Relatórios › Acompanhamentos › Demonstrativo Faturamento</p>
+              <p>Mesmo período. No botão <b>Empresas…</b>, marque <b>todas</b>. Emita e salve em Excel (.xls).</p></li>
+            <li><h3>Planilha de controle do Fiscal</h3>
+              <p>A do mês mais recente, com a coluna <b>Tributação / Funrural</b>. A página usa a última aba mensal (ex.: 10_2026).</p></li>
+          </ol>
+          <p class="fonte">Caminhos dos relatórios: manual Domínio Folha, p. 1040–1042, e Escrita Fiscal, p. 1633–1634 (servidor, dez/2018). Os dois foram emitidos para a carteira toda em 15 e 16/10/2026.</p>
+        </div>
+        <div class="painel texto">
+          <h2>Na página</h2>
+          <ol class="fluxo">
+            <li><h3>Carregar</h3><p>Arraste os três arquivos para a página, ou use <b>Carregar arquivos</b>. A ordem não importa.</p></li>
+            <li><h3>Conferir antes</h3><p>No Consolidado, o filtro <b>Conferir antes</b> mostra quem tem a opção da planilha do Fiscal diferente do que a Folha calcula, a opção pela folha sem folha ou dado incompleto. Resolva com o Fiscal e a Folha antes de apresentar. O filtro <b>Sem receita</b> mostra quem não tem venda na Escrita Fiscal no período; para esses, a página não compara as opções.</p></li>
+            <li><h3>Apresentar</h3><p>Em <b>Abrir</b> ou na aba Tela do cliente, escolha o produtor e clique em <b>Mostrar ao cliente</b>. Só esse produtor aparece. Se o cliente der outra previsão de receita, digite no campo; a conta muda na hora. Esc sai da tela.</p></li>
+            <li><h3>Registrar e guardar</h3><p>Marque status e decisão. <b>Baixar Excel</b> guarda tudo; salve na mesma pasta dos relatórios, fora do OneDrive. <b>Abrir Excel salvo</b> devolve o trabalho em outro dia ou outro computador.</p></li>
+          </ol>
+        </div>
+      </div>
+      <div class="painel texto">
+        <h3>Como a página decide quem é produtor</h3>
+        <ul>
+          <li><b>Planilha do Fiscal:</b> entram as linhas com "Sobre a folha", "Sobre faturamento" ou "Micro produtor", com a opção registrada.</li>
+          <li><b>Folha:</b> entram também os empregadores rurais que não estão na planilha, pelo percentual de terceiros que o Domínio calcula. Cerca de 0,2% indica produtor PF; 5,2% indica produtor PJ que paga sobre a folha; perto de 2,7% indica provável PJ que paga sobre a venda.</li>
+          <li><b>Empregados em outro código:</b> quando outro código da Folha tem o mesmo nome do produtor, a página soma a folha dele ao produtor.</li>
+          <li>A opção atual é a da planilha do Fiscal; sem ela, a que a Folha calcula (com os 20% sobre a folha, é folha).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+<button class="btn sair-cliente" id="bt-sair-cliente" type="button" hidden>Sair da tela do cliente</button>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/*PARSER-START*/
+// Leitura dos relatórios do Domínio. O .xls do Domínio grava o índice das abas (BOUNDSHEET) apontando
+// para antes do início real de cada aba; o Excel tolera, as bibliotecas não. Corrigimos o índice antes de ler.
+function abrirPlanilhaDominio(u8) {
+  let wb = null;
+  try {
+    const cfb = XLSX.CFB.read(u8, { type: 'array' });
+    const ent = XLSX.CFB.find(cfb, 'Workbook') || XLSX.CFB.find(cfb, 'Book');
+    if (ent && ent.content && ent.content.length) {
+      const d = ent.content;
+      const u16 = i => d[i] | (d[i + 1] << 8);
+      const u32 = i => (d[i] | (d[i + 1] << 8) | (d[i + 2] << 16)) + d[i + 3] * 16777216;
+      const recs = []; let o = 0;
+      while (o + 4 <= d.length) { const t = u16(o), l = u16(o + 2); recs.push([o, t]); o += 4 + l; }
+      const bofs = recs.filter(r => r[1] === 0x809).map(r => r[0]);
+      let corrigidos = 0;
+      for (const [p, t] of recs) {
+        if (t !== 0x85) continue;
+        const alvo = u32(p + 4);
+        if (bofs.includes(alvo)) continue;
+        const b = bofs.find(x => x > alvo);
+        if (b === undefined) continue;
+        d[p + 4] = b & 255; d[p + 5] = (b >>> 8) & 255; d[p + 6] = (b >>> 16) & 255; d[p + 7] = (b >>> 24) & 255;
+        corrigidos++;
+      }
+      if (corrigidos) wb = XLSX.read(XLSX.CFB.write(cfb, { type: 'array' }), { type: 'array' });
+    }
+  } catch (e) { wb = null; }
+  return wb || XLSX.read(u8, { type: 'array' });
+}
+
+const MESES_PT = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const linhasDe = ws => XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: false });
+const celulas = row => row.map((v, j) => [j, v]).filter(([, v]) => v !== null && v !== '' && !(typeof v === 'string' && !v.trim()));
+const numero = v => {
+  if (v === null || v === undefined || v === '') return 0;
+  if (typeof v === 'number') return v;
+  const s = String(v).replace(/[^\d,.-]/g, '');
+  return parseFloat(s.includes(',') ? s.replace(/\./g, '').replace(',', '.') : s) || 0;
+};
+const soDigitos = s => String(s || '').replace(/\D/g, '');
+const texto = s => (s === null || s === undefined ? '' : String(s).normalize('NFC').replace(/\s+/g, ' ').trim());
+
+function tipoDoArquivo(wb) {
+  if (wb.SheetNames.includes('_estado')) return 'salvo';
+  const nomes = [...new Set([...wb.SheetNames.slice(-2), ...wb.SheetNames.slice(0, 3)])];
+  for (const nome of nomes) {
+    const rows = linhasDe(wb.Sheets[nome]).slice(0, 40);
+    const txt = rows.map(r => r.filter(v => typeof v === 'string').map(texto).join('|')).join('\n');
+    if (/M Ê S/.test(txt) && /Total R\$/.test(txt)) return 'faturamento';
+    if (/Remuneração/.test(txt) && /INSS Emp\./.test(txt)) return 'encargos';
+    if (/COD\. DOMINIO/i.test(txt) && /TRIBUTAÇÃO \/ FUNRURAL/i.test(txt)) return 'controle';
+  }
+  return null;
+}
+
+function mesesDoPeriodo(txt) {
+  const m = String(txt || '').match(/(\d{2})\/(\d{4})\s*a\s*(\d{2})\/(\d{4})/);
+  if (!m) return null;
+  return (+m[4] - +m[2]) * 12 + (+m[3] - +m[1]) + 1;
+}
+
+// Folha > Relatórios > Encargos > Empresa: usa só a linha "Total:" que vem depois de "Empregados:" em cada empresa.
+function lerEncargos(wb) {
+  const out = {};
+  const COLS = [['Remuneração', 'remuneracao'], ['FGTS', 'fgts'], ['INSS Emp.', 'inssEmp'], ['INSS Terc.', 'terc'], ['RAT', 'rat'], ['Deduções', 'deducoes'], ['Total', 'total']];
+  for (const nome of wb.SheetNames) {
+    let atual = null, cols = null, contagem = null, cabecalho = true;
+    for (const row of linhasDe(wb.Sheets[nome])) {
+      const cel = celulas(row);
+      if (!cel.length) continue;
+      const rot = String(cel[0][1]).trim();
+      if (rot === 'Empresa:') {
+        const s = String((cel[1] || [])[1] || '').trim();
+        const m = s.match(/^(\d+)\s*-\s*(.*)$/);
+        const codigo = m ? m[1] : s;
+        atual = out[codigo] || (out[codigo] = { codigo, nome: m ? m[2].trim() : '', competencia: '', tipo: '' });
+        cabecalho = true;
+      } else if (atual && rot === 'Competência:') {
+        atual.competencia = String((cel[1] || [])[1] || '').trim();
+      } else if (rot === 'Código') {
+        cols = {}; cel.forEach(([j, v]) => { cols[String(v).trim()] = j; });
+        cabecalho = false;
+      } else if (atual && cabecalho && cel.length >= 2 && typeof cel[1][1] === 'string' && /mensal|13|adiant|f[ée]rias|rescis|complementar|todos/i.test(cel[1][1]) && !atual.tipo) {
+        atual.tipo = cel[1][1].trim();
+      } else if (rot === 'Empregados:' && atual) {
+        const vals = cel.map(c => c[1]);
+        const pega = k => { const i = vals.findIndex(v => String(v).trim() === k); return i >= 0 && i + 1 < vals.length ? numero(vals[i + 1]) : 0; };
+        contagem = { empregados: pega('Empregados:'), contribuintes: pega('Contribuintes:') };
+      } else if (rot === 'Total:' && atual && contagem && cols) {
+        const nums = cel.filter(([, v]) => typeof v === 'number');
+        for (const [titulo, campo] of COLS) {
+          const alvo = cols[titulo];
+          if (alvo === undefined) { atual[campo] = 0; continue; }
+          const cand = nums.filter(([j]) => j >= alvo - 1 && j <= alvo + 1).sort((a, b) => Math.abs(a[0] - alvo) - Math.abs(b[0] - alvo));
+          atual[campo] = cand.length ? Math.round(cand[0][1] * 100) / 100 : 0;
+        }
+        Object.assign(atual, contagem);
+        atual.meses = mesesDoPeriodo(atual.competencia) || 1;
+        atual.ok = true;
+        contagem = null;
+      }
+    }
+  }
+  return Object.values(out).filter(r => r.ok).map(({ ok, ...r }) => r);
+}
+
+// Escrita Fiscal > Relatórios > Acompanhamentos > Demonstrativo Faturamento: uma aba por empresa.
+function lerFaturamento(wb) {
+  const out = [];
+  for (const nomeAba of wb.SheetNames) {
+    const codigoAba = nomeAba.replace(/^Empresa\s*/i, '').split(' - ')[0].trim();
+    const cad = {}; let cols = null; const meses = [];
+    for (const row of linhasDe(wb.Sheets[nomeAba])) {
+      const cel = celulas(row);
+      if (!cel.length) continue;
+      const rot = String(cel[0][1]).trim();
+      if (['Empresa:', 'CNPJ:', 'CPF:'].includes(rot) && cel.length > 1) cad[rot] = String(cel[1][1]).trim();
+      else if (rot === 'M Ê S') { cols = {}; cel.forEach(([j, v]) => { cols[String(v).trim()] = j; }); }
+      else if (cols && MESES_PT.includes(rot.toLowerCase())) {
+        const vals = Object.fromEntries(cel);
+        const ano = Math.round(numero(vals[cols['ANO']]));
+        const pega = titulo => {
+          const alvo = cols[titulo];
+          if (alvo === undefined) return 0;
+          const cand = cel.filter(([j, v]) => typeof v === 'number' && j !== cols['ANO'] && j <= alvo && j > alvo - 6).map(([j]) => j);
+          return cand.length ? numero(vals[Math.max(...cand)]) : 0;
+        };
+        meses.push({ mes: `${ano}-${String(MESES_PT.indexOf(rot.toLowerCase()) + 1).padStart(2, '0')}`, total: pega('Total R$') });
+      }
+    }
+    if (!cols) continue;
+    const empresa = (cad['Empresa:'] || '').replace(/^\d+\s*-\s*/, '');
+    const codigo = /^\d+$/.test(codigoAba) ? codigoAba : ((cad['Empresa:'] || '').match(/^(\d+)/) || [])[1] || codigoAba;
+    const total = meses.reduce((s, m) => s + m.total, 0);
+    const ord = meses.map(m => m.mes).sort();
+    const fmt = m => m ? `${m.slice(5)}/${m.slice(0, 4)}` : '';
+    out.push({ codigo, nome: empresa, doc: cad['CNPJ:'] || cad['CPF:'] || '', total: Math.round(total * 100) / 100, meses: meses.length,
+      mesesMov: meses.filter(m => m.total).length, periodo: ord.length ? `${fmt(ord[0])} a ${fmt(ord[ord.length - 1])}` : '' });
+  }
+  return out;
+}
+
+// Planilha de controle do Fiscal: última aba mensal (MM_AAAA), cabeçalho com "COD. DOMINIO".
+function lerControle(wb) {
+  const mensais = wb.SheetNames.filter(n => /^\d{2}_\d{4}$/.test(n.trim()));
+  const ordem = n => { const [m, a] = n.trim().split('_'); return +a * 100 + +m; };
+  const candidatas = mensais.length ? [...mensais].sort((a, b) => ordem(b) - ordem(a)) : wb.SheetNames;
+  for (const aba of candidatas) {
+    const rows = linhasDe(wb.Sheets[aba]);
+    const i = rows.findIndex(r => r.some(v => typeof v === 'string' && texto(v).toUpperCase() === 'COD. DOMINIO'));
+    if (i < 0) continue;
+    const H = rows[i].map(v => texto(v).toUpperCase());
+    const c = { cod: H.indexOf('COD. DOMINIO'), nome: H.indexOf('RAZÃO SOCIAL'), trib: H.indexOf('TRIBUTAÇÃO / FUNRURAL'), status: H.indexOf('STATUS'), doc: H.indexOf('CNPJ/CPF') };
+    const linhas = [];
+    for (const r of rows.slice(i + 1)) {
+      const cod = r[c.cod];
+      if (cod === null || cod === undefined || cod === '') continue;
+      const codigo = typeof cod === 'number' ? String(Math.trunc(cod)) : texto(cod);
+      if (!/^\d+$/.test(codigo)) continue;
+      linhas.push({ codigo, nome: c.nome >= 0 ? texto(r[c.nome]) : '', trib: c.trib >= 0 ? texto(r[c.trib]).toUpperCase() : '',
+        status: c.status >= 0 ? texto(r[c.status]).toUpperCase() : '', doc: c.doc >= 0 ? texto(r[c.doc]) : '' });
+    }
+    return { aba, linhas };
+  }
+  return { aba: '', linhas: [] };
+}
+/*PARSER-END*/
+
+/*MOTOR-START*/
+// ---------- premissas (padrão = planilha "Planejamento Tributário Funrural" do escritório) ----------
+const PADRAO = {
+  versao: 1,
+  multFolha: 40 / 3,
+  gilratPadrao: 0.03,
+  margem: 0.05,
+  aprovadoPor: '',
+  aprovadoEm: '',
+  PF: [
+    { id: 'inss_c', nome: 'INSS sobre a comercialização', aliq: 0.0132, base: 'receita', incide: 'C', fonte: 'Lei 8.212, art. 25, I; LC 224/2025 e IN RFB 2.321/2026 (desde 04/2026)' },
+    { id: 'rat_c', nome: 'GILRAT sobre a comercialização', aliq: 0.0011, base: 'receita', incide: 'C', fonte: 'Lei 8.212, art. 25, II; LC 224/2025 (desde 04/2026)' },
+    { id: 'senar', nome: 'SENAR', aliq: 0.002, base: 'receita', incide: 'CF', fonte: 'Lei 8.315/1991: no PF, sempre sobre a comercialização' },
+    { id: 'inss_f', nome: 'INSS patronal sobre a folha', aliq: 0.20, base: 'folha', incide: 'F', fonte: 'Lei 8.212, art. 22, I; opção do art. 25, § 13' },
+    { id: 'gilrat_f', nome: 'GILRAT sobre a folha', aliq: null, base: 'folha', incide: 'F', gilrat: true, fonte: 'Lei 8.212, art. 22, II; IN RFB 1.867/2019, anexo I (1% a 3%)' },
+    { id: 'incra', nome: 'INCRA', aliq: 0.002, base: 'folha', incide: 'F', fonte: 'Planilha do escritório' }
+  ],
+  PJ: [
+    { id: 'inss_c', nome: 'INSS sobre a comercialização', aliq: 0.0187, base: 'receita', incide: 'C', fonte: 'Lei 8.870/1994, art. 25, I; LC 224/2025 e IN RFB 2.321/2026 (desde 04/2026)' },
+    { id: 'rat_c', nome: 'GILRAT sobre a comercialização', aliq: 0.0011, base: 'receita', incide: 'C', fonte: 'Lei 8.870/1994, art. 25, II; LC 224/2025 (desde 04/2026)' },
+    { id: 'senar_c', nome: 'SENAR sobre a comercialização', aliq: 0.0025, base: 'receita', incide: 'C', fonte: 'Lei 8.870/1994, art. 25, § 1º' },
+    { id: 'inss_f', nome: 'INSS patronal sobre a folha', aliq: 0.20, base: 'folha', incide: 'F', fonte: 'Lei 8.212, art. 22, I; opção do art. 25, § 7º, da Lei 8.870' },
+    { id: 'gilrat_f', nome: 'GILRAT sobre a folha', aliq: null, base: 'folha', incide: 'F', gilrat: true, fonte: 'Lei 8.212, art. 22, II; IN RFB 1.867/2019, anexo I' },
+    { id: 'senar_f', nome: 'SENAR sobre a folha', aliq: 0.025, base: 'folha', incide: 'F', fonte: 'No PJ, acompanha a opção' },
+    { id: 'se', nome: 'Salário-educação', aliq: 0.025, base: 'folha', incide: 'F', fonte: 'Planilha do escritório' },
+    { id: 'incra', nome: 'INCRA', aliq: 0.002, base: 'folha', incide: 'F', fonte: 'Planilha do escritório' }
+  ]
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+const OPC = { C: 'Comercialização', F: 'Folha' };
+const STATUS = ['A apresentar', 'Apresentado', 'Decidido', 'Não se aplica'];
+const PRODUTOR_TRIB = { 'SOBRE A FOLHA': 'F', 'SOBRE FATURAMENTO': 'C', 'MICRO PRODUTOR': 'C' };
+const PJ_NOME = /\b(LTDA|S\/?A|S\.A\.|EIRELI|EPP)\b/i;
+const CAMPOS_USUARIO = ['receitaPrev', 'mediaFolha', 'gilrat', 'opcaoAtual', 'folhaDe', 'folhaAutoOff', 'status', 'decisao', 'obs', 'excluido', 'pessoaManual'];
+
+let S = estadoInicial();
+function estadoInicial() {
+  return { premissas: clone(PADRAO), base: { fat: {}, enc: {}, ctl: {} }, fontes: { fat: null, enc: null, ctl: null }, produtores: {}, exemplo: false };
+}
+function carregarExemplos() {
+  S = estadoInicial(); S.exemplo = true;
+  const per = '11/2025 a 10/2026';
+  const ctl = (codigo, nome, trib, doc) => { S.base.ctl[codigo] = { codigo, nome, trib, status: 'ATIVA', doc }; };
+  const fat = (codigo, nome, total) => { S.base.fat[codigo] = { codigo, nome, doc: '', total, meses: 12, mesesMov: 12, periodo: per }; };
+  const enc = (codigo, nome, rem, empregados, folha) => {
+    S.base.enc[codigo] = { codigo, nome, competencia: per, tipo: 'Mensal', remuneracao: rem, empregados, inssEmp: folha ? rem * 0.2 : 0, rat: folha ? rem * 0.03 : 0, terc: rem * 0.002, meses: 12 };
+  };
+  ctl('C01', 'Produtor exemplo A', 'SOBRE FATURAMENTO', '000.000.000-01'); fat('C01', 'Produtor exemplo A', 6200000); enc('C01', 'Produtor exemplo A', 252000, 6, false);
+  ctl('C02', 'Produtor exemplo B', 'SOBRE A FOLHA', '000.000.000-02'); fat('C02', 'Produtor exemplo B', 2400000); enc('C02', 'Produtor exemplo B', 540000, 14, true);
+  ctl('C03', 'Agropecuária Exemplo Ltda', 'SOBRE FATURAMENTO', '00.000.000/0001-03'); fat('C03', 'Agropecuária Exemplo Ltda', 14800000);
+  S.base.enc.C03 = { codigo: 'C03', nome: 'Agropecuária Exemplo Ltda', competencia: per, tipo: 'Mensal', remuneracao: 1150000, empregados: 31, inssEmp: 0, rat: 0, terc: 1150000 * 0.027, meses: 12 };
+  ctl('C04', 'Produtor exemplo C', 'MICRO PRODUTOR', '000.000.000-04'); fat('C04', 'Produtor exemplo C', 950000);
+  S.fontes = { fat: 'exemplo', enc: 'exemplo', ctl: 'exemplo' };
+  reconstruir();
+  S.produtores.C02.status = 'Apresentado';
+}
+
+// percentual de terceiros sobre a base do INSS: identifica o empregador rural na Folha
+function sinalFolha(e) {
+  if (!e || !(e.remuneracao > 0) || !(e.terc > 0)) return null;
+  const base = e.inssEmp > 0.05 * e.remuneracao ? e.inssEmp / 0.2 : e.remuneracao;
+  const r = e.terc / base;
+  if (r >= 0.001 && r <= 0.003) return { r, pessoa: 'PF', rotulo: 'empregador rural PF (terceiros de 0,2%)', certeza: true };
+  if (Math.abs(r - 0.052) <= 0.0015) return { r, pessoa: 'PJ', rotulo: 'produtor PJ na folha (terceiros de 5,2%)', certeza: true };
+  if (r >= 0.015 && r <= 0.032) return { r, pessoa: 'PJ', rotulo: 'provável produtor PJ na comercialização (terceiros perto de 2,7%)', certeza: false };
+  return null;
+}
+const normNome = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase()
+  .replace(/[^A-Z ]/g, ' ').replace(/\b(FAZENDA|FAZ|SITIO|CAEPF|CEI|E OUTROS|E OUTRO|OUTROS|ME|EPP|LTDA)\b/g, ' ').replace(/\s+/g, ' ').trim();
+
+// monta a lista de produtores a partir dos arquivos carregados, preservando o que a equipe editou
+function reconstruir() {
+  const B = S.base, antigos = S.produtores || {}, novos = {};
+  const temCtl = Object.keys(B.ctl).length > 0, temEnc = Object.keys(B.enc).length > 0;
+  const cria = (codigo, campos) => {
+    const velho = antigos[codigo] || {};
+    const p = { codigo, nome: '', doc: '', pessoa: 'PF', origem: '', tribCtl: '', opcaoCtl: null, sinal: null, folhaAuto: [],
+      receitaPrev: null, mediaFolha: null, gilrat: null, opcaoAtual: null, folhaDe: '', folhaAutoOff: false,
+      status: 'A apresentar', decisao: null, obs: '', excluido: false, pessoaManual: false, ...campos };
+    for (const k of CAMPOS_USUARIO) if (velho[k] !== undefined) p[k] = velho[k];
+    if (velho.pessoaManual) p.pessoa = velho.pessoa;
+    p.fat = B.fat[codigo] || null;
+    p.enc = B.enc[codigo] || null;
+    if (!p.nome) p.nome = (p.fat && p.fat.nome) || (p.enc && p.enc.nome) || '';
+    novos[codigo] = p;
+    return p;
+  };
+  // 1. produtores da planilha de controle do Fiscal
+  for (const c of Object.values(B.ctl)) {
+    if (!(c.trib in PRODUTOR_TRIB) || /INATIV|BAIXAD|ENCERR/.test(c.status)) continue;
+    const pj = soDigitos(c.doc).length === 14 && PJ_NOME.test(c.nome);
+    cria(c.codigo, { nome: c.nome, doc: c.doc, pessoa: pj ? 'PJ' : 'PF', origem: 'controle', tribCtl: c.trib, opcaoCtl: PRODUTOR_TRIB[c.trib] });
+  }
+  // 2. empregadores rurais da Folha que não estão na planilha
+  if (temEnc) for (const e of Object.values(B.enc)) {
+    if (novos[e.codigo]) continue;
+    const s = sinalFolha(e);
+    if (!s) continue;
+    cria(e.codigo, { nome: e.nome, pessoa: s.pessoa, origem: 'folha', sinal: s, tribCtl: temCtl && B.ctl[e.codigo] ? B.ctl[e.codigo].trib : '' });
+  }
+  // 3. empregados em outro código com o mesmo nome: soma a folha ao produtor e tira o outro código da lista
+  const vinculados = new Set();
+  const lista0 = Object.values(novos).filter(p => p.origem === 'controle');
+  for (const p of lista0) {
+    const n = normNome(p.nome);
+    if (n.length < 6) continue;
+    for (const q of Object.values(novos)) {
+      if (q.origem !== 'folha' || vinculados.has(q.codigo) || q.pessoa !== p.pessoa) continue;
+      const m = normNome(q.nome);
+      if (m && (m === n || m.startsWith(n + ' ') || n.startsWith(m + ' '))) { p.folhaAuto.push(q.codigo); vinculados.add(q.codigo); }
+    }
+  }
+  for (const c of vinculados) novos[c].vinculoAuto = true;
+  S.produtores = novos;
+  // guarda só o que interessa quando a identificação está completa
+  if (temCtl && temEnc) {
+    const manter = new Set(Object.keys(novos));
+    for (const p of Object.values(novos)) String(p.folhaDe || '').split(/[\s,;]+/).filter(Boolean).forEach(c => manter.add(c));
+    for (const k of ['fat', 'enc', 'ctl']) for (const c of Object.keys(B[k])) if (!manter.has(c)) delete B[k][c];
+  }
+}
+
+// ---------- cálculo ----------
+function codigosVinculados(p) {
+  const auto = p.folhaAutoOff ? [] : (p.folhaAuto || []);
+  const manual = String(p.folhaDe || '').split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+  return [...new Set([...auto, ...manual])].filter(c => c !== p.codigo);
+}
+function encsDe(p) {
+  return [p.enc, ...codigosVinculados(p).map(c => S.base.enc[c] || (S.produtores[c] && S.produtores[c].enc))].filter(Boolean);
+}
+function receitaBase(p) { return p.fat && p.fat.meses ? p.fat.total * 12 / p.fat.meses : 0; }
+function mediaBase(p) { return encsDe(p).reduce((s, e) => s + (e.meses ? e.remuneracao / e.meses : 0), 0); }
+function receita(p) { return p.receitaPrev !== null && p.receitaPrev !== undefined ? p.receitaPrev : receitaBase(p); }
+function media(p) { return p.mediaFolha !== null && p.mediaFolha !== undefined ? p.mediaFolha : mediaBase(p); }
+function gilrat(p) { return p.gilrat || S.premissas.gilratPadrao; }
+function empregados(p) { return encsDe(p).reduce((s, e) => s + (e.empregados || 0), 0); }
+function opcaoDominio(p) {
+  const encs = encsDe(p).filter(e => e.remuneracao > 0);
+  if (!encs.length) return null;
+  return encs.some(e => e.inssEmp > 0.05 * e.remuneracao) ? 'F' : 'C';
+}
+function opcaoMarcada(p) { return p.opcaoAtual || p.opcaoCtl || null; }
+function opcaoAtual(p) { return opcaoMarcada(p) || opcaoDominio(p) || (media(p) > 0 ? null : 'C'); }
+function vinculadoA(codigo) {
+  for (const p of Object.values(S.produtores)) if (p.codigo !== codigo && !p.excluido && codigosVinculados(p).includes(codigo)) return p.codigo;
+  return null;
+}
+function lista() {
+  return Object.values(S.produtores).sort((a, b) => (parseInt(a.codigo.replace(/\D/g, '')) || 0) - (parseInt(b.codigo.replace(/\D/g, '')) || 0) || a.codigo.localeCompare(b.codigo));
+}
+function ativos() { return lista().filter(p => !p.excluido && !vinculadoA(p.codigo)); }
+
+function calcular(p) {
+  const pr = S.premissas, R = receita(p), M = media(p), W = M * pr.multFolha, g = gilrat(p);
+  const linhas = (pr[p.pessoa] || pr.PF).map(l => {
+    const aliq = l.gilrat ? g : l.aliq;
+    const base = l.base === 'receita' ? R : W;
+    return { ...l, aliq, baseValor: base, valor: aliq * base };
+  });
+  const C = linhas.filter(l => l.incide.includes('C')), F = linhas.filter(l => l.incide.includes('F'));
+  const soma = a => a.reduce((s, l) => s + l.valor, 0);
+  const taxa = (a, base) => a.filter(l => l.base === base).reduce((s, l) => s + l.aliq, 0);
+  const custoC = soma(C), custoF = soma(F);
+  const semFolha = !(M > 0), semReceita = !(R > 0);
+  // dado que não sustenta recomendação: receita abaixo da folha anual ou folha desproporcionalmente pequena
+  let suspeita = null;
+  if (!semReceita && !semFolha && R < W) suspeita = 'A receita do período é menor que a folha anual: o faturamento no Domínio parece incompleto (notas não lançadas ou em outro código).';
+  else if (!semFolha && R > 20e6 && W < 0.002 * R) suspeita = 'A folha é muito pequena para a receita: confira se o Demonstrativo inclui remessas ou transferências e se há empregados em outro código.';
+  const melhor = semFolha ? 'C' : (custoF < custoC ? 'F' : 'C');
+  const atual = opcaoAtual(p);
+  const custoAtual = atual === 'F' ? custoF : atual === 'C' ? custoC : null;
+  const custoMelhor = melhor === 'F' ? custoF : custoC;
+  const ganho = custoAtual !== null && atual !== melhor && !semFolha && !semReceita ? custoAtual - custoMelhor : 0;
+  const mudar = ganho > 0 && ganho >= pr.margem * custoAtual && !suspeita;
+  // equilíbrio: custoC = custoF  =>  W* = R × (aCR − aFR) / (aFF − aCF)
+  const aCR = taxa(C, 'receita'), aCF = taxa(C, 'folha'), aFR = taxa(F, 'receita'), aFF = taxa(F, 'folha');
+  const wEq = aFF > aCF ? R * (aCR - aFR) / (aFF - aCF) : null;
+  return { R, M, W, g, linhasC: C, linhasF: F, custoC, custoF, melhor, atual, custoAtual, ganho, mudar, semFolha, semReceita, suspeita,
+    aCR, aFR, aFF,
+    dif: Math.abs(custoC - custoF), wEq, mEq: wEq !== null ? wEq / pr.multFolha : null };
+}
+
+function alertas(p, c) {
+  const a = [], dom = opcaoDominio(p), marcada = opcaoMarcada(p);
+  if (marcada && dom && marcada !== dom) {
+    const quem = p.opcaoAtual ? 'A opção marcada aqui' : 'A planilha do Fiscal';
+    a.push({ n: 'crit', t: `${quem} diz ${OPC[marcada]}, mas a Folha no Domínio calcula ${dom === 'F' ? 'os 20% sobre a folha' : 'sem os 20% sobre a folha'}. Confira antes de apresentar: pode haver pagamento em dobro ou falta de recolhimento.` });
+  }
+  if (c.suspeita) a.push({ n: 'crit', t: `${c.suspeita} A comparação fica fora da soma de economia até a conferência.` });
+  if (c.atual === 'F' && c.semFolha)
+    a.push({ n: 'crit', t: 'Opção pela folha sem folha no Encargos. Sem empregado, a opção pela folha não é permitida (SC Cosit 286/2019). Se os empregados estão em outro código com nome diferente, informe-o em "Somar a folha do código".' });
+  if (p.origem === 'folha' && p.sinal)
+    a.push({ n: p.sinal.certeza ? 'info' : 'warn', t: `Identificado pela Folha: ${p.sinal.rotulo}. ${p.tribCtl ? `Na planilha do Fiscal está como ${p.tribCtl.toLowerCase()}.` : 'Não está na planilha do Fiscal.'}${p.sinal.certeza ? '' : ' É uma inferência: confirme a classificação na Folha.'}` });
+  const auto = p.folhaAutoOff ? [] : (p.folhaAuto || []);
+  if (auto.length) a.push({ n: 'info', t: `Folha somada do código ${auto.join(', ')}, que tem o mesmo nome do produtor.` });
+  if (c.semReceita)
+    a.push({ n: 'warn', t: 'Sem faturamento no Demonstrativo do período: não há comparação. As notas de venda deste produtor não estão na Escrita Fiscal ou estão em outro código.' });
+  if (p.fat && p.fat.meses && p.fat.meses < 12 && p.receitaPrev === null)
+    a.push({ n: 'info', t: `Receita anualizada de ${p.fat.meses} meses (${p.fat.periodo}). Safra concentrada distorce a conta: confirme a previsão com o cliente.` });
+  if (encsDe(p).some(e => e.tipo && !/mensal/i.test(e.tipo)))
+    a.push({ n: 'warn', t: 'O Encargos não foi emitido com o tipo de folha Mensal. Emita de novo com Mensal para não contar o 13º duas vezes.' });
+  if (c.semFolha && c.atual !== 'F')
+    a.push({ n: 'info', t: 'Sem folha: só a contribuição sobre a comercialização se aplica.' });
+  return a;
+}
+const temCrit = (p, c) => alertas(p, c).some(a => a.n === 'crit');
+
+// ---------- Excel ----------
+function linhaExcel(p) {
+  const c = calcular(p), dom = opcaoDominio(p);
+  return {
+    'Código': p.codigo, 'Produtor': p.nome, 'PF/PJ': p.pessoa,
+    'Origem': p.origem === 'controle' ? `Planilha do Fiscal: ${p.tribCtl.toLowerCase()}` : (p.sinal ? `Folha: ${p.sinal.rotulo}` : ''),
+    'Opção atual': c.atual ? OPC[c.atual] : '', 'Opção calculada no Domínio': dom ? OPC[dom] : 'sem folha',
+    'Faturado no período': p.fat ? p.fat.total : '', 'Período do faturamento': p.fat ? p.fat.periodo : '',
+    'Receita prevista 2027': Math.round(c.R), 'Receita editada': p.receitaPrev !== null ? 'sim' : 'não',
+    'Folha média mensal': Math.round(c.M), 'Folha editada': p.mediaFolha !== null ? 'sim' : 'não', 'Empregados': empregados(p) || '',
+    'Folha somada de': codigosVinculados(p).join(', '),
+    'Folha anual estimada': Math.round(c.W), 'GILRAT': c.g,
+    'Custo comercialização': Math.round(c.custoC), 'Custo folha': c.semFolha ? '' : Math.round(c.custoF), 'Menor custo': c.semReceita ? 'sem receita' : OPC[c.melhor],
+    'Economia ao mudar': c.mudar ? Math.round(c.ganho) : '', 'Folha mensal de equilíbrio': c.mEq !== null && !c.semFolha ? Math.round(c.mEq) : '',
+    'Status': p.status, 'Decisão 2027': p.decisao ? OPC[p.decisao] : '', 'Observação': p.obs,
+    'Situação': p.excluido ? 'fora da lista' : (vinculadoA(p.codigo) ? 'folha somada no ' + vinculadoA(p.codigo) : ''),
+    'Conferir': alertas(p, c).filter(a => a.n !== 'info').map(a => a.t).join(' | ')
+  };
+}
+function montarExcel() {
+  const wb = XLSX.utils.book_new();
+  const L = lista();
+  const ws1 = XLSX.utils.json_to_sheet(L.map(linhaExcel));
+  ws1['!cols'] = [8, 36, 6, 34, 16, 16, 16, 20, 16, 8, 14, 8, 10, 12, 14, 8, 16, 14, 16, 14, 14, 14, 16, 40, 18, 60].map(wch => ({ wch }));
+  XLSX.utils.book_append_sheet(wb, ws1, 'Consolidado');
+  const pr = S.premissas;
+  const prem = [['Premissa', 'Valor'], ['Folha anual = média mensal ×', pr.multFolha], ['GILRAT padrão', pr.gilratPadrao], ['Diferença mínima para sinalizar', pr.margem], [], ['Pessoa', 'Contribuição', 'Alíquota', 'Base', 'Incide em', 'Fonte']];
+  for (const k of ['PF', 'PJ']) for (const l of pr[k]) prem.push([k, l.nome, l.gilrat ? 'do produtor' : l.aliq, l.base, { C: 'Comercialização', F: 'Folha', CF: 'Nas duas' }[l.incide], l.fonte || '']);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(prem), 'Premissas');
+  const mem = [['Código', 'Produtor', 'Opção', 'Contribuição', 'Alíquota', 'Base', 'Valor/ano']];
+  for (const p of L) { const c = calcular(p); for (const [o, ls] of [['Comercialização', c.linhasC], ['Folha', c.semFolha ? [] : c.linhasF]]) for (const l of ls) mem.push([p.codigo, p.nome, o, l.nome, l.aliq, Math.round(l.baseValor), Math.round(l.valor)]); }
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(mem), 'Memória');
+  const json = JSON.stringify({ app: 'funrural-2027', v: 2, S });
+  const pedacos = []; for (let i = 0; i < json.length; i += 30000) pedacos.push([json.slice(i, i + 30000)]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(pedacos), '_estado');
+  wb.Workbook = { Sheets: [{ Hidden: 0 }, { Hidden: 0 }, { Hidden: 0 }, { Hidden: 1 }] };
+  return wb;
+}
+function estadoDoSalvo(wb) {
+  const ws = wb.Sheets['_estado'];
+  if (!ws) throw new Error('o arquivo não tem a aba de estado; use um Excel baixado desta página');
+  const o = JSON.parse(XLSX.utils.sheet_to_json(ws, { header: 1, raw: true }).map(r => r[0] || '').join(''));
+  if (!o || o.app !== 'funrural-2027') throw new Error('arquivo de outra ferramenta');
+  const s = migrar(o.S);
+  if (Object.values(s.produtores || {}).some(p => p.origem === undefined)) { S = s; reconstruir(); }
+  return S === s ? S : s;
+}
+function migrar(s) {
+  s.premissas = Object.assign(clone(PADRAO), s.premissas || {});
+  // Excel e navegador guardam as premissas inteiras: troca a fonte que citava o ADE Codac pela do padrão atual.
+  for (const k of ['PF', 'PJ']) for (const l of (s.premissas[k] || [])) {
+    if (/ADE Codac/i.test(l.fonte || '')) l.fonte = ((PADRAO[k] || []).find(x => x.id === l.id) || {}).fonte || '';
+  }
+  if (!s.base) {
+    s.base = { fat: {}, enc: {}, ctl: {} };
+    for (const p of Object.values(s.produtores || {})) { if (p.fat) s.base.fat[p.codigo] = p.fat; if (p.enc) s.base.enc[p.codigo] = p.enc; }
+  }
+  s.fontes = Object.assign({ fat: null, enc: null, ctl: null }, s.fontes || {});
+  return s;
+}
+
+// recebe os arquivos já abertos ({nome, wb}) e atualiza o estado; devolve as mensagens
+function aplicarArquivos(abertos) {
+  const msgs = [];
+  for (const { nome, wb } of abertos) {
+    const tipo = tipoDoArquivo(wb);
+    if (tipo === 'salvo') { S = estadoDoSalvo(wb); msgs.push(`${nome}: trabalho salvo aberto`); continue; }
+    if (!tipo) { msgs.push(`${nome}: não reconheci. Use o Encargos da Empresa, o Demonstrativo Faturamento ou a planilha de controle do Fiscal.`); continue; }
+    if (S.exemplo) { const pr = S.premissas; S = estadoInicial(); S.premissas = pr; }
+    if (tipo === 'faturamento') {
+      const L = lerFaturamento(wb);
+      S.base.fat = Object.fromEntries(L.map(r => [r.codigo, r]));
+      S.fontes.fat = `${L.length} empresas${L[0] ? ', ' + L[0].periodo : ''}`;
+      msgs.push(`Faturamento: ${L.length} empresas`);
+    } else if (tipo === 'encargos') {
+      const L = lerEncargos(wb);
+      S.base.enc = Object.fromEntries(L.map(r => [r.codigo, r]));
+      S.fontes.enc = `${L.length} empresas${L[0] ? ', ' + L[0].competencia : ''}`;
+      msgs.push(`Folha: ${L.length} empresas`);
+    } else {
+      const { aba, linhas } = lerControle(wb);
+      S.base.ctl = Object.fromEntries(linhas.map(r => [r.codigo, r]));
+      S.fontes.ctl = `aba ${aba}, ${linhas.length} empresas`;
+      msgs.push(`Planilha do Fiscal: aba ${aba}`);
+    }
+  }
+  reconstruir();
+  const at = ativos();
+  const falta = [['ctl', 'planilha de controle do Fiscal'], ['enc', 'Encargos da Empresa'], ['fat', 'Demonstrativo Faturamento']].filter(([k]) => !S.fontes[k]).map(x => x[1]);
+  msgs.push(`${at.length} produtores na lista${falta.length ? `. Lista parcial: falta ${falta.join(' e ')}` : ''}`);
+  return msgs;
+}
+/*MOTOR-END*/
+
+// ---------- formatação ----------
+const BRL0 = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+const NUM0 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
+const NUM2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const brl = v => BRL0.format(Math.round(v || 0));
+const pct = (v, d = 2) => `${(100 * (v || 0)).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d })}%`;
+const esc = s => String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+function lerValor(txt) {
+  const s = String(txt || '').replace(/[R$\s]/g, '');
+  if (!s) return null;
+  let n;
+  if (s.includes(',')) n = parseFloat(s.replace(/\./g, '').replace(',', '.'));
+  else if ((s.match(/\./g) || []).length > 1 || /^\d{1,3}(\.\d{3})+$/.test(s)) n = parseFloat(s.replace(/\./g, ''));
+  else n = parseFloat(s);
+  return isFinite(n) ? n : null;
+}
+let toastT = null;
+function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 6500); }
+
+const CHAVE = 'datacon-funrural-2027:v1';
+let UI = { aba: 'consolidado', filtro: 'todos', busca: '', sel: null };
+function salvarLocal() { try { localStorage.setItem(CHAVE, JSON.stringify(S)); } catch (e) { /* navegador sem armazenamento */ } }
+function lerLocal() { try { const t = localStorage.getItem(CHAVE); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
+
+// ---------- render: consolidado ----------
+function origemTexto(p) {
+  if (p.origem === 'controle') return `Planilha do Fiscal: ${p.tribCtl.toLowerCase()}`;
+  if (p.sinal) return `Pela Folha: ${p.sinal.rotulo}`;
+  return '';
+}
+function renderConsolidado() {
+  const at = ativos();
+  const cs = at.map(p => [p, calcular(p)]);
+  const nPF = at.filter(p => p.pessoa === 'PF').length;
+  const mud = cs.filter(([, c]) => c.mudar);
+  const somaGanho = mud.reduce((s, [, c]) => s + c.ganho, 0);
+  const apres = at.filter(p => p.status === 'Apresentado' || p.status === 'Decidido').length;
+  const decid = at.filter(p => p.status === 'Decidido').length;
+  const comAlerta = cs.filter(([p, c]) => temCrit(p, c)).length;
+  const pelaFolha = at.filter(p => p.origem === 'folha').length;
+  const semRec = cs.filter(([, c]) => c.semReceita).length;
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi ${!S.exemplo && !S.fontes.ctl ? 'alerta' : ''}"><span class="label">Produtores</span><span class="v">${at.length}</span><span class="s">${!S.exemplo && !S.fontes.ctl ? 'Lista parcial: falta a planilha do Fiscal' : `${nPF} PF · ${at.length - nPF} PJ${pelaFolha ? ` · ${pelaFolha} achados pela Folha` : ''}`}</span></div>
+    <div class="kpi destaque"><span class="label">Mudar de opção compensa</span><span class="v">${mud.length}</span><span class="s">${mud.length ? brl(somaGanho) + ' por ano somados' : 'nenhum com a diferença mínima'}</span></div>
+    <div class="kpi"><span class="label">Apresentados</span><span class="v">${apres} <span style="font-size:1rem;color:var(--ink-2)">de ${at.length}</span></span><span class="s">${decid} com decisão registrada</span></div>
+    <div class="kpi ${comAlerta ? 'alerta' : ''}"><span class="label">Conferir antes</span><span class="v">${comAlerta}</span><span class="s">opção divergente, folha sem empregado ou dado incompleto${semRec ? ` · ${semRec} sem receita no Domínio` : ''}</span></div>`;
+
+  const filtros = [['todos', 'Todos'], ['mudar', 'Mudar compensa'], ['alerta', 'Conferir antes'], ['semreceita', 'Sem receita'], ['folha', 'Achados pela Folha'], ['apresentar', 'A apresentar'], ['excluidos', 'Fora da lista']];
+  document.getElementById('chips').innerHTML = filtros.map(([k, t]) => `<button class="chip" type="button" data-filtro="${k}" aria-pressed="${UI.filtro === k}">${t}</button>`).join('');
+  const f = S.fontes;
+  document.getElementById('fontes').textContent = S.exemplo ? 'Exemplo' : [`Fiscal: ${f.ctl || 'não carregada'}`, `Faturamento: ${f.fat || 'não carregado'}`, `Folha: ${f.enc || 'não carregada'}`].join(' · ');
+
+  const q = UI.busca.trim().toLowerCase();
+  const base = UI.filtro === 'excluidos' ? lista().filter(p => p.excluido || vinculadoA(p.codigo)) : at;
+  let linhas = base.map(p => [p, calcular(p)]);
+  if (UI.filtro === 'mudar') linhas = linhas.filter(([, c]) => c.mudar);
+  if (UI.filtro === 'alerta') linhas = linhas.filter(([p, c]) => temCrit(p, c));
+  if (UI.filtro === 'folha') linhas = linhas.filter(([p]) => p.origem === 'folha');
+  if (UI.filtro === 'semreceita') linhas = linhas.filter(([, c]) => c.semReceita);
+  if (UI.filtro === 'apresentar') linhas = linhas.filter(([p]) => p.status === 'A apresentar');
+  if (q) linhas = linhas.filter(([p]) => (p.codigo + ' ' + p.nome).toLowerCase().includes(q));
+
+  const cab = `<thead><tr><th>Cód.</th><th>Produtor</th><th>PF/PJ</th><th>Opção atual</th><th class="n">Receita prevista 2027</th><th class="n">Folha média mensal</th><th class="n">Custo comercialização</th><th class="n">Custo folha</th><th>Menor custo</th><th class="n">Economia ao mudar</th><th>Status</th><th>Decisão 2027</th><th></th></tr></thead>`;
+  if (!linhas.length) {
+    const vazio = !Object.keys(S.produtores).length ? 'Nenhum produtor identificado. Carregue a planilha de controle do Fiscal e o Encargos da Empresa.' : (UI.filtro === 'excluidos' ? 'Nenhum produtor fora da lista.' : 'Nenhum produtor neste filtro.');
+    document.getElementById('tabela').innerHTML = cab + `<tbody><tr><td colspan="13" class="vazio">${vazio}</td></tr></tbody>`;
+    return;
+  }
+  const corpo = linhas.map(([p, c]) => {
+    const al = alertas(p, c), crit = al.filter(a => a.n === 'crit').length, warn = al.filter(a => a.n === 'warn').length;
+    const dom = opcaoDominio(p), vinc = vinculadoA(p.codigo), marcada = opcaoMarcada(p);
+    const padrao = p.opcaoCtl ? `Fiscal: ${OPC[p.opcaoCtl]}` : dom ? `Folha: ${OPC[dom]}` : (c.semFolha ? 'Sem folha: Comercialização' : 'Não informada');
+    return `<tr data-cod="${esc(p.codigo)}">
+      <td class="tab">${esc(p.codigo)}</td>
+      <td class="nome">${esc(p.nome || '(sem nome)')}<span class="origem">${esc(origemTexto(p))}</span><small>${crit ? `<span class="pill crit">${crit} a conferir</span> ` : ''}${warn ? `<span class="pill warn">${warn} aviso${warn > 1 ? 's' : ''}</span> ` : ''}${vinc ? `folha somada no ${esc(vinc)}` : ''}${p.excluido ? 'fora da lista' : ''}</small></td>
+      <td><select data-campo="pessoa" aria-label="PF ou PJ"><option ${p.pessoa === 'PF' ? 'selected' : ''}>PF</option><option ${p.pessoa === 'PJ' ? 'selected' : ''}>PJ</option></select></td>
+      <td><select data-campo="opcaoAtual" aria-label="Opção atual">
+        <option value="" ${!p.opcaoAtual ? 'selected' : ''}>${padrao}</option>
+        <option value="C" ${p.opcaoAtual === 'C' ? 'selected' : ''}>Comercialização</option><option value="F" ${p.opcaoAtual === 'F' ? 'selected' : ''}>Folha</option></select></td>
+      <td class="n"><input class="cel-input ${p.receitaPrev !== null ? 'editado' : ''}" data-campo="receitaPrev" inputmode="decimal" value="${NUM0.format(Math.round(c.R))}" aria-label="Receita prevista 2027" title="${p.receitaPrev !== null ? 'Editado. Domínio: ' + brl(receitaBase(p)) : 'Do Domínio' + (p.fat ? ' (' + esc(p.fat.periodo) + ')' : '')}"></td>
+      <td class="n"><input class="cel-input ${p.mediaFolha !== null ? 'editado' : ''}" data-campo="mediaFolha" inputmode="decimal" value="${NUM0.format(Math.round(c.M))}" aria-label="Folha média mensal" title="${p.mediaFolha !== null ? 'Editado. Domínio: ' + brl(mediaBase(p)) : (encsDe(p).length ? 'Do Domínio: ' + NUM0.format(empregados(p)) + ' empregados' : 'Sem folha no Domínio')}"></td>
+      <td class="n">${brl(c.custoC)}</td>
+      <td class="n">${c.semFolha ? '<span class="muted">não se aplica</span>' : brl(c.custoF)}</td>
+      <td>${c.semReceita ? '<span class="pill n">Sem receita</span>' : `<span class="pill ${c.melhor === 'F' ? 'f' : 'c'}">${OPC[c.melhor]}</span>`}</td>
+      <td class="n">${c.mudar ? `<span class="economia">${brl(c.ganho)}</span>` : (c.suspeita && c.ganho > 0 ? '<span class="pill crit">conferir</span>' : '<span class="muted">—</span>')}</td>
+      <td><select data-campo="status" aria-label="Status">${STATUS.map(s => `<option ${p.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
+      <td><select data-campo="decisao" aria-label="Decisão 2027"><option value="" ${!p.decisao ? 'selected' : ''}>—</option><option value="C" ${p.decisao === 'C' ? 'selected' : ''}>Comercialização</option><option value="F" ${p.decisao === 'F' ? 'selected' : ''}>Folha</option></select></td>
+      <td><button class="btn link" type="button" data-abrir="${esc(p.codigo)}">Abrir</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tabela').innerHTML = cab + `<tbody>${corpo}</tbody>`;
+}
+
+// ---------- render: tela do cliente ----------
+function renderCliente() {
+  const at = ativos();
+  const sel = document.getElementById('sel-produtor');
+  if (!UI.sel || !S.produtores[UI.sel]) UI.sel = at.length ? at[0].codigo : null;
+  sel.innerHTML = at.map(p => `<option value="${esc(p.codigo)}" ${p.codigo === UI.sel ? 'selected' : ''}>${esc(p.codigo)} · ${esc(p.nome)}</option>`).join('');
+  const caixa = document.getElementById('folha-cliente');
+  if (!UI.sel) { caixa.innerHTML = '<div class="folha-cliente vazio">Carregue os arquivos para escolher um produtor.</div>'; document.getElementById('ficha').innerHTML = ''; document.getElementById('alertas').innerHTML = ''; return; }
+  const p = S.produtores[UI.sel];
+  caixa.innerHTML = `<div class="folha-cliente">
+    <div class="cab">
+      <div style="display:grid;gap:4px;min-width:0">
+        <span class="marca-dc">DATACON · PLANEJAMENTO DO FUNRURAL 2027</span>
+        <h2>${esc(p.nome || p.codigo)}</h2>
+        <span class="muted small">Produtor rural pessoa ${p.pessoa === 'PJ' ? 'jurídica' : 'física'} · código ${esc(p.codigo)}</span>
+      </div>
+      <div style="display:grid;gap:4px;justify-items:end;text-align:right">
+        <span class="label">Opção atual</span>
+        <span id="cli-atual"></span>
+      </div>
+    </div>
+    <div class="premissas-cli">
+      <div class="campo"><label class="label" for="cli-receita">Receita bruta prevista para 2027</label>
+        <input id="cli-receita" inputmode="decimal" value="${NUM0.format(Math.round(receita(p)))}">
+        <span class="ref">${p.fat ? `Faturado no Domínio: ${brl(p.fat.total)} (${esc(p.fat.periodo)})` : 'Sem faturamento no Domínio'}</span></div>
+      <div class="campo"><label class="label" for="cli-folha">Folha de pagamento média por mês</label>
+        <input id="cli-folha" inputmode="decimal" value="${NUM0.format(Math.round(media(p)))}">
+        <span class="ref">${mediaBase(p) ? `Média no Domínio: ${brl(mediaBase(p))} · ${NUM0.format(empregados(p))} empregados` : 'Sem folha no Domínio'}</span></div>
+      <div class="campo"><label class="label" for="cli-gilrat">GILRAT da atividade</label>
+        <select id="cli-gilrat">${[0.01, 0.02, 0.03].map(v => `<option value="${v}" ${Math.abs(gilrat(p) - v) < 1e-9 ? 'selected' : ''}>${pct(v, 0)}</option>`).join('')}</select>
+        <span class="ref">Grau de risco do CNAE (1%, 2% ou 3%)</span></div>
+    </div>
+    <div id="cli-resultado" style="display:grid;gap:22px"></div>
+    <ul class="notas">
+      <li>A opção vale para o ano inteiro e para todos os imóveis em que o produtor exerce atividade rural. Ela se faz pelo recolhimento da competência de janeiro de 2027.</li>
+      <li>Quem optar pela folha entrega aos compradores a declaração de opção, para que eles não retenham a contribuição sobre a venda.</li>
+      <li>Sem empregado, a opção pela folha não é permitida (Solução de Consulta Cosit 286/2019).</li>
+      ${p.pessoa === 'PF' ? '<li>No produtor pessoa física, o SENAR é sempre sobre a comercialização, nas duas opções.</li>' : '<li>No produtor pessoa jurídica, o SENAR acompanha a opção: sobre a venda ou sobre a folha.</li>'}
+      <li>Contratar na safra aumenta a folha. Compare a folha prevista com o ponto de equilíbrio acima.</li>
+    </ul>
+    <p class="rodape-cli">Estimativa para planejamento, com as alíquotas vigentes desde abril de 2026 (LC 224/2025 e IN RFB 2.321/2026), a partir dos números do Domínio.</p>
+  </div>`;
+  renderResultadoCliente();
+  renderFicha(p);
+}
+
+function renderResultadoCliente() {
+  const p = S.produtores[UI.sel]; if (!p) return;
+  const c = calcular(p);
+  document.getElementById('cli-atual').innerHTML = c.atual ? `<span class="pill ${c.atual === 'F' ? 'f' : 'c'}">${OPC[c.atual]}</span>` : '<span class="pill n">Não informada</span>';
+  const max = Math.max(c.custoC, c.semFolha ? 0 : c.custoF, 1);
+  const vC = c.melhor === 'C', vF = c.melhor === 'F';
+  const card = (titulo, custo, sub, vence) => `<div class="opcao ${vence ? 'vence' : ''}">
+      <div class="titulo"><h3>${titulo}</h3>${vence ? '<span class="pill f">Menor custo</span>' : ''}</div>
+      <div class="valor">${custo === null ? '—' : brl(custo)} <small>${custo === null ? '' : 'por ano'}</small></div>
+      <span class="muted small">${sub}</span></div>`;
+  const subC = `${pct(c.R ? c.custoC / c.R : 0)} da receita prevista`;
+  // alíquota real de cada base: a soma sobre a folha e, à parte, o que incide sobre a receita (SENAR do PF)
+  const subF = c.semFolha ? 'Não se aplica: sem folha de pagamento'
+    : `${pct(c.aFF)} da folha anual de ${brl(c.W)}${c.aFR > 0 ? ` + ${pct(c.aFR)} de SENAR sobre o faturamento` : ''}`;
+  let veredito;
+  if (c.semReceita) veredito = 'Informe a receita bruta prevista para 2027 para comparar as duas opções.';
+  else if (c.semFolha) veredito = 'Sem empregados, o Funrural é pago sobre a comercialização.';
+  else if (c.dif < 1) veredito = 'As duas opções custam o mesmo com estes números.';
+  else veredito = `Pagar sobre a <b>${c.melhor === 'F' ? 'folha de pagamento' : 'comercialização'}</b> custa <span class="eco">${brl(c.dif)} a menos</span> em 2027 (${pct(c.dif / Math.max(c.custoC, c.custoF), 0)}).`;
+  let eq = '';
+  if (!c.semFolha && c.mEq !== null && c.mEq > 0) {
+    const topo = Math.max(c.M, c.mEq) * 1.6;
+    const pos = v => Math.min(100, Math.max(0, 100 * v / topo));
+    eq = `<div class="equilibrio">
+      <div class="label">Ponto de equilíbrio</div>
+      <p>A folha compensa enquanto a média mensal da folha ficar abaixo de <b>${brl(c.mEq)}</b>. Hoje ela é de <b>${brl(c.M)}</b>${c.M < c.mEq ? `: há folga de ${brl(c.mEq - c.M)} por mês.` : `: está ${brl(c.M - c.mEq)} por mês acima.`}</p>
+      <div class="escala" style="--eq:${pos(c.mEq)}%" role="img" aria-label="Folha média de ${brl(c.M)} contra equilíbrio de ${brl(c.mEq)}">
+        <div class="linha"></div>
+        <div class="ponto eq" style="left:${pos(c.mEq)}%"><i></i></div>
+        <div class="ponto" style="left:${pos(c.M)}%"><i></i></div>
+      </div>
+      <div class="escala-rot"><span>R$ 0</span><span class="leg"><i class="sw eq"></i>Equilíbrio ${brl(c.mEq)}</span><span class="leg"><i class="sw"></i>Hoje ${brl(c.M)}</span><span>${brl(topo)}</span></div>
+    </div>`;
+  }
+  // Cada base aparece separada: as contribuições sobre a folha somam uma alíquota, e as que incidem sobre a receita
+  // (SENAR do PF) ficam em linha própria. Com uma base só, a soma das alíquotas vai no total.
+  const tabela = (titulo, linhas, total) => {
+    const naFolha = linhas.filter(l => l.base === 'folha'), naReceita = linhas.filter(l => l.base === 'receita');
+    const misto = naFolha.length > 0 && naReceita.length > 0;
+    const soma = (ls, k) => ls.reduce((s, l) => s + l[k], 0);
+    const linha = (l, marca) => `<tr><td>${esc(l.nome)}${marca ? ` <span class="muted small">(${marca})</span>` : ''}</td><td class="n">${pct(l.aliq)}</td><td class="n">${brl(l.baseValor)}</td><td class="n">${brl(l.valor)}</td></tr>`;
+    const marcaDe = l => misto ? (l.incide === 'CF' ? 'sobre o faturamento · nas duas opções' : 'sobre o faturamento') : (l.incide === 'CF' ? 'nas duas opções' : '');
+    const subtotal = (rot, ls) => `<tr class="subtotal"><td><b>${rot}</b></td><td class="n"><b>${pct(soma(ls, 'aliq'))}</b></td><td class="n">${brl(ls[0].baseValor)}</td><td class="n"><b>${brl(soma(ls, 'valor'))}</b></td></tr>`;
+    const corpo = misto
+      ? naFolha.map(l => linha(l, '')).join('') + subtotal('Soma sobre a folha', naFolha) + naReceita.map(l => linha(l, marcaDe(l))).join('')
+      : linhas.map(l => linha(l, marcaDe(l))).join('');
+    const rodape = misto
+      ? `<td>Total</td><td class="n"></td><td class="n"></td><td class="n">${brl(total)}</td>`
+      : `<td>Total</td><td class="n">${pct(soma(linhas, 'aliq'))}</td><td class="n"></td><td class="n">${brl(total)}</td>`;
+    return `<div class="tabela-caixa"><table>
+      <thead><tr><th colspan="4">${titulo}</th></tr><tr><th>Contribuição</th><th class="n">Alíquota</th><th class="n">Base</th><th class="n">Valor/ano</th></tr></thead>
+      <tbody>${corpo}</tbody>
+      <tfoot><tr>${rodape}</tr></tfoot></table></div>`;
+  };
+  const barra = (rot, v, vence, det) => `<div class="barra ${vence ? 'vence' : ''}" title="${esc(det)}"><span>${rot}</span><div class="trilho"><div class="marca-b" style="width:${(100 * v / max).toFixed(1)}%"></div></div><span class="v">${brl(v)}</span></div>`;
+  const det = ls => ls.map(l => `${l.nome}: ${brl(l.valor)}`).join(' · ');
+  document.getElementById('cli-resultado').innerHTML = `
+    <div class="opcoes">
+      ${card('Sobre a comercialização', c.custoC, subC, vC)}
+      ${card('Sobre a folha de pagamento', c.semFolha ? null : c.custoF, subF, vF && !c.semFolha)}
+    </div>
+    <p class="veredito">${veredito}</p>
+    ${c.semFolha ? '' : `<div class="barras" aria-label="Custo anual por opção">${barra('Comercialização', c.custoC, vC, det(c.linhasC))}${barra('Folha', c.custoF, vF, det(c.linhasF))}</div>`}
+    ${eq}
+    <div class="memoria">
+      ${tabela('Comercialização: como chegamos ao valor', c.linhasC, c.custoC)}
+      ${c.semFolha ? '' : tabela(`Folha: média de ${brl(c.M)} × ${NUM2.format(S.premissas.multFolha)} = ${brl(c.W)} por ano`, c.linhasF, c.custoF)}
+    </div>`;
+  document.getElementById('alertas').innerHTML = alertas(p, c).map(a => `<div class="${a.n}">${esc(a.t)}</div>`).join('');
+}
+
+function renderFicha(p) {
+  const dom = opcaoDominio(p);
+  const padrao = p.opcaoCtl ? `Como na planilha do Fiscal: ${OPC[p.opcaoCtl]}` : dom ? `Como na Folha: ${OPC[dom]}` : 'Não informada';
+  const auto = p.folhaAuto || [];
+  document.getElementById('ficha').innerHTML = `
+    <h3>Ficha do produtor (só a equipe vê)</h3>
+    <div class="grade">
+      <div class="campo"><label class="label" for="fi-pessoa">PF ou PJ</label><select id="fi-pessoa" data-fcampo="pessoa"><option ${p.pessoa === 'PF' ? 'selected' : ''}>PF</option><option ${p.pessoa === 'PJ' ? 'selected' : ''}>PJ</option></select></div>
+      <div class="campo"><label class="label" for="fi-opcao">Opção atual</label><select id="fi-opcao" data-fcampo="opcaoAtual"><option value="" ${!p.opcaoAtual ? 'selected' : ''}>${padrao}</option><option value="C" ${p.opcaoAtual === 'C' ? 'selected' : ''}>Comercialização</option><option value="F" ${p.opcaoAtual === 'F' ? 'selected' : ''}>Folha</option></select></div>
+      <div class="campo"><label class="label" for="fi-status">Status</label><select id="fi-status" data-fcampo="status">${STATUS.map(s => `<option ${p.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+      <div class="campo"><label class="label" for="fi-decisao">Decisão 2027</label><select id="fi-decisao" data-fcampo="decisao"><option value="" ${!p.decisao ? 'selected' : ''}>—</option><option value="C" ${p.decisao === 'C' ? 'selected' : ''}>Comercialização</option><option value="F" ${p.decisao === 'F' ? 'selected' : ''}>Folha</option></select></div>
+      <div class="campo"><label class="label" for="fi-folhade">Somar a folha do código</label><input id="fi-folhade" data-fcampo="folhaDe" value="${esc(p.folhaDe)}" placeholder="ex.: 812, 813"><span class="ref">${auto.length ? `Já somado pelo nome: ${esc(auto.join(', '))}` : 'Só se o nome for diferente'}</span></div>
+      <div class="campo" style="grid-column: span 3"><label class="label" for="fi-obs">Observação</label><input id="fi-obs" data-fcampo="obs" value="${esc(p.obs)}" placeholder="O que o cliente disse, próximos passos"></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <button class="btn" type="button" id="fi-restaurar">Voltar aos números do Domínio</button>
+      ${auto.length ? `<button class="btn" type="button" id="fi-auto">${p.folhaAutoOff ? 'Voltar a somar a folha de ' + esc(auto.join(', ')) : 'Não somar a folha de ' + esc(auto.join(', '))}</button>` : ''}
+      <button class="btn perigo" type="button" id="fi-excluir">${p.excluido ? 'Devolver à lista' : 'Tirar da lista (não é produtor)'}</button>
+    </div>`;
+}
+
+// ---------- render: premissas ----------
+function renderPremissas() {
+  const pr = S.premissas;
+  const linhas = k => pr[k].map((l, i) => `<tr>
+      <td>${esc(l.nome)}<div class="fonte">${esc(l.fonte || '')}</div></td>
+      <td class="n">${l.gilrat ? '<span class="muted small">do produtor</span>' : `<input data-prem="${k}.${i}.aliq" inputmode="decimal" value="${(100 * l.aliq).toLocaleString('pt-BR', { maximumFractionDigits: 4 })}" aria-label="Alíquota em %">%`}</td>
+      <td>${l.base === 'receita' ? 'Receita' : 'Folha'}</td>
+      <td><select data-prem="${k}.${i}.incide" aria-label="Em qual opção incide"><option value="C" ${l.incide === 'C' ? 'selected' : ''}>Só na comercialização</option><option value="F" ${l.incide === 'F' ? 'selected' : ''}>Só na folha</option><option value="CF" ${l.incide === 'CF' ? 'selected' : ''}>Nas duas</option></select></td>
+    </tr>`).join('');
+  const tab = (k, t) => `<div class="painel"><h3>${t}</h3><div class="tabela-caixa"><table><thead><tr><th>Contribuição</th><th class="n">Alíquota</th><th>Base</th><th>Incide em</th></tr></thead><tbody>${linhas(k)}</tbody></table></div></div>`;
+  document.getElementById('premissas').innerHTML = `
+    <div class="painel">
+      <h2>Premissas do cálculo</h2>
+      <p class="muted">Reproduzem a planilha "Planejamento Tributário Funrural" do escritório, revisada com o contador em 05/11/2026. Mude só se a lei mudar; a mudança vale para todos os produtores e entra no Excel.</p>
+      <div class="gerais">
+        <div class="campo"><label class="label" for="pr-mult">Folha anual = média mensal ×</label><input id="pr-mult" inputmode="decimal" value="${NUM2.format(pr.multFolha)}"><span class="ref">13,33 = 12 meses + 13º + 1/3 de férias</span></div>
+        <div class="campo"><label class="label" for="pr-gilrat">GILRAT padrão</label><select id="pr-gilrat">${[0.01, 0.02, 0.03].map(v => `<option value="${v}" ${Math.abs(pr.gilratPadrao - v) < 1e-9 ? 'selected' : ''}>${pct(v, 0)}</option>`).join('')}</select><span class="ref">Padrão do escritório para o produtor rural</span></div>
+        <div class="campo"><label class="label" for="pr-margem">Diferença mínima para sinalizar mudança</label><input id="pr-margem" inputmode="decimal" value="${(100 * pr.margem).toLocaleString('pt-BR')}"><span class="ref">% do custo atual; só afeta o filtro "Mudar compensa"</span></div>
+        <div class="campo"><span class="label">Restaurar</span><button class="btn" type="button" id="pr-restaurar">Restaurar o padrão da planilha</button></div>
+      </div>
+    </div>
+    <div class="duas">${tab('PF', 'Produtor pessoa física')}${tab('PJ', 'Produtor pessoa jurídica')}</div>`;
+}
+
+// ---------- render: passo a passo ----------
+function renderAjuda() {
+  const f = S.fontes, real = !S.exemplo;
+  const item = (titulo, desc, v) => `<div class="arquivo"><h3>${titulo}</h3><span class="muted small">${desc}</span>${real && v ? `<span class="ok">Carregado: ${esc(v)}</span>` : '<span class="falta">Ainda não carregado</span>'}</div>`;
+  document.getElementById('status-arquivos').innerHTML =
+    item('Encargos da Empresa', 'Folha: média mensal, empregados, opção que a Folha calcula e empregadores rurais fora da planilha.', f.enc) +
+    item('Demonstrativo Faturamento', 'Escrita Fiscal: receita de cada produtor no período.', f.fat) +
+    item('Planilha de controle do Fiscal', 'Quem é produtor, nome e opção registrada (Tributação / Funrural).', f.ctl);
+}
+
+// ---------- render geral ----------
+function render() {
+  document.getElementById('aviso-exemplo').hidden = !S.exemplo;
+  const faltam = S.exemplo ? [] : [['ctl', 'a planilha de controle do Fiscal (sem ela, ficam de fora os produtores sem empregados e a opção registrada)'], ['enc', 'o Encargos da Empresa (sem ele, não há folha nem conferência da opção)'], ['fat', 'o Demonstrativo Faturamento (sem ele, não há receita)']].filter(([k]) => !S.fontes[k]);
+  const av = document.getElementById('aviso-faltam');
+  const semCtl = faltam.some(([k]) => k === 'ctl');
+  av.hidden = !faltam.length;
+  av.classList.toggle('info', !semCtl);
+  av.innerHTML = !faltam.length ? '' : `<span><strong>${semCtl ? `Lista parcial: ${ativos().length} produtores, só os que têm empregados.` : 'Falta carregar:'}</strong> ${semCtl ? 'Arraste também ' : ''}${faltam.map(x => x[1]).join('; ')}.</span><button class="btn" type="button" data-carregar>Carregar arquivos</button>`;
+  document.querySelectorAll('[data-view]').forEach(v => { v.hidden = v.dataset.view !== UI.aba; });
+  document.querySelectorAll('[role=tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.aba === UI.aba));
+  if (UI.aba === 'consolidado') renderConsolidado();
+  if (UI.aba === 'cliente') renderCliente();
+  if (UI.aba === 'premissas') renderPremissas();
+  if (UI.aba === 'ajuda') renderAjuda();
+}
+function mudou(reRender = true) { salvarLocal(); if (reRender) render(); }
+
+// ---------- arquivos ----------
+async function carregarArquivos(files) {
+  const abertos = [], erros = [];
+  for (const f of files) {
+    try { abertos.push({ nome: f.name, wb: abrirPlanilhaDominio(new Uint8Array(await f.arrayBuffer())) }); }
+    catch (e) { erros.push(`${f.name}: não consegui abrir (${e.message || e})`); }
+  }
+  let msgs = [];
+  try { msgs = aplicarArquivos(abertos); } catch (e) { msgs = [`Erro ao montar a lista: ${e.message || e}`]; }
+  UI.sel = null;
+  mudou();
+  toast([...erros, ...msgs].join(' · '));
+}
+async function baixarExcel() {
+  const wb = montarExcel();
+  const hoje = new Date();
+  const nome = `funrural-2027-${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}.xlsx`;
+  XLSX.writeFile(wb, nome);
+  toast('Excel gerado. Guarde na pasta dos relatórios, fora do OneDrive.');
+}
+
+// ---------- eventos ----------
+const $ = id => document.getElementById(id);
+const abrirSeletor = () => $('in-dominio').click();
+$('bt-carregar').onclick = abrirSeletor;
+$('bt-carregar-2').onclick = abrirSeletor;
+$('aviso-faltam').addEventListener('click', e => { if (e.target.closest('[data-carregar]')) abrirSeletor(); });
+$('bt-abrir').onclick = () => $('in-salvo').click();
+$('bt-baixar').onclick = () => baixarExcel();
+$('in-dominio').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; if (fs.length) carregarArquivos(fs); };
+$('in-salvo').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { S = estadoDoSalvo(XLSX.read(new Uint8Array(await f.arrayBuffer()), { type: 'array' })); UI.sel = null; mudou(); toast('Trabalho salvo aberto: edições e premissas restauradas.'); }
+  catch (err) { toast(`Não consegui abrir: ${err.message || err}.`); }
+};
+document.addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('solta'); });
+document.addEventListener('dragleave', e => { if (!e.relatedTarget) document.body.classList.remove('solta'); });
+document.addEventListener('drop', e => { e.preventDefault(); document.body.classList.remove('solta'); const fs = [...(e.dataTransfer.files || [])]; if (fs.length) carregarArquivos(fs); });
+document.querySelectorAll('[role=tab]').forEach(b => { b.onclick = () => { UI.aba = b.dataset.aba; render(); }; });
+
+$('busca').oninput = e => { UI.busca = e.target.value; renderConsolidado(); };
+$('chips').onclick = e => { const b = e.target.closest('[data-filtro]'); if (b) { UI.filtro = b.dataset.filtro; renderConsolidado(); } };
+function aplicaCampo(p, k, valor) {
+  if (k === 'receitaPrev' || k === 'mediaFolha') p[k] = lerValor(valor);
+  else if (k === 'pessoa') { p.pessoa = valor; p.pessoaManual = true; }
+  else p[k] = valor || (k === 'opcaoAtual' || k === 'decisao' ? null : '');
+  if (k === 'decisao' && valor && p.status !== 'Decidido') p.status = 'Decidido';
+}
+$('tabela').addEventListener('change', e => {
+  const el = e.target, tr = el.closest('tr[data-cod]'); if (!tr) return;
+  const p = S.produtores[tr.dataset.cod], k = el.dataset.campo; if (!p || !k) return;
+  aplicaCampo(p, k, el.value); mudou();
+});
+$('tabela').addEventListener('click', e => { const b = e.target.closest('[data-abrir]'); if (b) { UI.sel = b.dataset.abrir; UI.aba = 'cliente'; render(); window.scrollTo(0, 0); } });
+
+$('sel-produtor').onchange = e => { UI.sel = e.target.value; renderCliente(); };
+$('v-cliente').addEventListener('input', e => {
+  const p = S.produtores[UI.sel]; if (!p) return;
+  if (e.target.id === 'cli-receita') { p.receitaPrev = lerValor(e.target.value); salvarLocal(); renderResultadoCliente(); }
+  if (e.target.id === 'cli-folha') { p.mediaFolha = lerValor(e.target.value); salvarLocal(); renderResultadoCliente(); }
+});
+$('v-cliente').addEventListener('change', e => {
+  const p = S.produtores[UI.sel]; if (!p) return;
+  const el = e.target;
+  if (el.id === 'cli-gilrat') { p.gilrat = parseFloat(el.value); salvarLocal(); renderResultadoCliente(); return; }
+  if (el.id === 'cli-receita' || el.id === 'cli-folha') { el.value = NUM0.format(Math.round(el.id === 'cli-receita' ? receita(p) : media(p))); return; }
+  const k = el.dataset.fcampo; if (!k) return;
+  aplicaCampo(p, k, el.value); mudou(false); renderCliente();
+});
+$('v-cliente').addEventListener('click', e => {
+  const p = S.produtores[UI.sel]; if (!p) return;
+  if (e.target.id === 'fi-restaurar') { p.receitaPrev = null; p.mediaFolha = null; p.gilrat = null; mudou(false); renderCliente(); toast('Receita, folha e GILRAT voltaram aos números do Domínio.'); }
+  if (e.target.id === 'fi-auto') { p.folhaAutoOff = !p.folhaAutoOff; mudou(false); renderCliente(); }
+  if (e.target.id === 'fi-excluir') { p.excluido = !p.excluido; mudou(false); if (p.excluido) UI.sel = null; renderCliente(); toast(p.excluido ? 'Produtor tirado da lista. Ele fica no filtro "Fora da lista".' : 'Produtor devolvido à lista.'); }
+});
+$('bt-modo-cliente').onclick = () => { document.body.classList.add('modo-cliente'); $('bt-sair-cliente').hidden = false; window.scrollTo(0, 0); };
+$('bt-sair-cliente').onclick = () => { document.body.classList.remove('modo-cliente'); $('bt-sair-cliente').hidden = true; };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('modo-cliente')) $('bt-sair-cliente').click(); });
+
+let confirmaRestaurar = false;
+$('v-premissas').addEventListener('change', e => {
+  const el = e.target, pr = S.premissas;
+  if (el.dataset.prem) { const [k, i, campo] = el.dataset.prem.split('.'); if (campo === 'aliq') { const v = lerValor(el.value); if (v !== null) pr[k][+i].aliq = v / 100; } else pr[k][+i][campo] = el.value; }
+  else if (el.id === 'pr-mult') { const v = lerValor(el.value); if (v) pr.multFolha = v; }
+  else if (el.id === 'pr-gilrat') pr.gilratPadrao = parseFloat(el.value);
+  else if (el.id === 'pr-margem') { const v = lerValor(el.value); if (v !== null) pr.margem = v / 100; }
+  mudou();
+});
+$('v-premissas').addEventListener('click', e => {
+  if (e.target.id !== 'pr-restaurar') return;
+  if (!confirmaRestaurar) { confirmaRestaurar = true; e.target.textContent = 'Clique de novo para confirmar'; setTimeout(() => { confirmaRestaurar = false; const b = $('pr-restaurar'); if (b) b.textContent = 'Restaurar o padrão da planilha'; }, 4000); return; }
+  confirmaRestaurar = false; S.premissas = clone(PADRAO); mudou(); toast('Premissas da planilha restauradas.');
+});
+
+// início
+(function iniciar() {
+  const salvo = lerLocal();
+  if (salvo && !salvo.exemplo && salvo.produtores && Object.keys(salvo.produtores).length) {
+    S = migrar(salvo);
+    if (Object.values(S.produtores).some(p => p.origem === undefined)) reconstruir();
+  } else carregarExemplos();
+  if (['cliente', 'premissas', 'ajuda'].includes(location.hash.slice(1))) UI.aba = location.hash.slice(1);
+  render();
+})();
+</script>
+
+</body></html>
