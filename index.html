@@ -116,6 +116,15 @@ th .th-ord:hover, th .th-ord:focus-visible { color: var(--accent); }
 th .th-ord .seta { display: inline-block; width: 1em; text-align: center; color: var(--accent); }
 .chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 5px 12px; cursor: pointer; font-size: 0.85rem; }
 .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+/* filtro de status do envio: um ponto de cor por status e a contagem ao lado */
+.chip[data-status]::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; background: var(--ponto, var(--ink-3)); }
+.chip[data-status="A apresentar"] { --ponto: #e3a84f; }
+.chip[data-status="Apresentado"] { --ponto: #55acee; }
+.chip[data-status="Decidido"] { --ponto: #1d7349; }
+.chip[data-status="Não se aplica"] { --ponto: #9aa6b8; }
+.chip[data-status="todos"]::before { display: none; }
+.chip .qtd { margin-left: 6px; font-variant-numeric: tabular-nums; opacity: .75; font-weight: 500; }
+.chip.zero { opacity: .55; }
 
 /* tabela */
 .tabela-caixa { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow-x: auto; }
@@ -311,7 +320,7 @@ body.modo-cliente { background: #f4f6f7; }
   <div class="wrap">
     <div class="marca">
       <h1>Funrural 2027</h1>
-      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 24/11/2026 15:25</span></span>
+      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 24/11/2026 15:36</span></span>
     </div>
     <span class="privado" title="A página lê os arquivos no seu computador. Nada é enviado para servidor.">Dados só neste navegador</span>
     <div class="acoes">
@@ -350,6 +359,10 @@ body.modo-cliente { background: #f4f6f7; }
         <span class="muted small" id="contagem" aria-live="polite"></span>
         <div style="display:flex;flex-wrap:wrap;gap:6px" id="chips"></div>
         <span class="muted small" id="fontes" style="margin-left:auto"></span>
+      </div>
+      <div class="filtros" id="barra-status" role="group" aria-label="Filtrar pelo status do envio ao cliente">
+        <span class="label">Status do envio</span>
+        <div style="display:flex;flex-wrap:wrap;gap:6px" id="chips-status"></div>
       </div>
       <div class="tabela-caixa"><table id="tabela"></table></div>
       <p class="fonte">Custos anuais estimados para 2027 com as premissas da aba Premissas. "Economia ao mudar" aparece quando a outra opção custa menos que a atual, acima da diferença mínima. Clique em "Abrir" para apresentar ao cliente.</p>
@@ -448,7 +461,7 @@ body.modo-cliente { background: #f4f6f7; }
             <li><h3>Apresentar</h3><p>Em <b>Abrir</b> ou na aba Tela do cliente, escolha o produtor e clique em <b>Mostrar ao cliente</b>. Só esse produtor aparece. Se o cliente der outra previsão de receita, digite no campo; a conta muda na hora. Esc sai da tela.</p></li>
             <li><h3>Achar um produtor</h3><p>No Consolidado, digite parte do nome, o código ou o CPF/CNPJ no campo de busca. Não precisa de acento nem de maiúscula, e as palavras podem vir em qualquer ordem. A lista sai em ordem alfabética; use <b>Ordenar por</b> ou clique no título de uma coluna para mudar. Na aba Tela do cliente, a lista de produtores também é alfabética e tem busca própria. Todos os valores em reais aparecem com centavos (R$ 1.234,56).</p></li>
             <li><h3>Levar em PDF</h3><p>Na aba Tela do cliente, escolha o produtor e clique em <b>Gerar PDF</b> (também aparece na tela do cliente). Na janela de impressão, escolha <b>Salvar como PDF</b> como destino: o arquivo sugerido já leva o nome do produtor. A ficha sai em uma página A4, com o logo e os dados da Datacon. Confira os valores antes de enviar.</p></li>
-            <li><h3>Registrar e guardar</h3><p>Marque status e decisão. <b>Baixar Excel</b> guarda tudo; salve na mesma pasta dos relatórios, fora do OneDrive. <b>Abrir Excel salvo</b> devolve o trabalho em outro dia ou outro computador.</p></li>
+            <li><h3>Registrar e guardar</h3><p>Marque o status e a decisão de cada produtor, na tabela ou na ficha. Para acompanhar o envio aos clientes, use os botões <b>Status do envio</b> acima da tabela (A apresentar, Apresentado, Decidido e Não se aplica): cada um mostra quantos produtores há naquele status e combina com a busca e com os outros filtros. <b>Baixar Excel</b> guarda tudo; salve na mesma pasta dos relatórios, fora do OneDrive. <b>Abrir Excel salvo</b> devolve o trabalho em outro dia ou outro computador.</p></li>
           </ol>
         </div>
       </div>
@@ -1135,7 +1148,7 @@ let toastT = null;
 function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 6500); }
 
 const CHAVE = 'datacon-funrural-2027:v1';
-let UI = { aba: 'consolidado', filtro: 'todos', busca: '', buscaCli: '', ordem: 'nome', sel: null };
+let UI = { aba: 'consolidado', filtro: 'todos', status: 'todos', busca: '', buscaCli: '', ordem: 'nome', sel: null };
 function salvarLocal() { try { localStorage.setItem(CHAVE, JSON.stringify(S)); } catch (e) { /* navegador sem armazenamento */ } }
 function lerLocal() { try { const t = localStorage.getItem(CHAVE); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
 
@@ -1163,7 +1176,7 @@ function renderConsolidado() {
     <div class="kpi"><span class="label">Apresentados</span><span class="v">${apres} <span style="font-size:1rem;color:var(--ink-2)">de ${at.length}</span></span><span class="s">${decid} com decisão registrada</span></div>
     <div class="kpi ${comAlerta ? 'alerta' : ''}"><span class="label">Conferir antes</span><span class="v">${comAlerta}</span><span class="s">opção divergente, folha sem empregado ou dado incompleto${semRec ? ` · ${semRec} sem receita no Domínio` : ''}</span></div>`;
 
-  const filtros = [['todos', 'Todos'], ['mudar', 'Mudar compensa'], ['alerta', 'Conferir antes'], ['semreceita', 'Sem receita'], ['folha', 'Achados pela Folha'], ['confirmado', 'Confirmados pela líder'], ['apresentar', 'A apresentar'], ['excluidos', 'Fora da lista']];
+  const filtros = [['todos', 'Todos'], ['mudar', 'Mudar compensa'], ['alerta', 'Conferir antes'], ['semreceita', 'Sem receita'], ['folha', 'Achados pela Folha'], ['confirmado', 'Confirmados pela líder'], ['excluidos', 'Fora da lista']];
   document.getElementById('chips').innerHTML = filtros.map(([k, t]) => `<button class="chip" type="button" data-filtro="${k}" aria-pressed="${UI.filtro === k}">${t}</button>`).join('');
   const f = S.fontes;
   document.getElementById('fontes').textContent = S.exemplo ? 'Exemplo' : [`Fiscal: ${f.ctl || 'não carregada'}`, `Faturamento: ${f.fat || 'não carregado'}`, `Folha: ${f.enc || 'não carregada'}`].join(' · ');
@@ -1176,12 +1189,19 @@ function renderConsolidado() {
   if (UI.filtro === 'folha') linhas = linhas.filter(([p]) => p.origem === 'folha');
   if (UI.filtro === 'confirmado') linhas = linhas.filter(([p]) => p.origem === 'confirmado');
   if (UI.filtro === 'semreceita') linhas = linhas.filter(([, c]) => c.semReceita);
-  if (UI.filtro === 'apresentar') linhas = linhas.filter(([p]) => p.status === 'A apresentar');
   if (q) linhas = linhas.filter(([p]) => combinaBusca(p, q));
+  // status do envio: as contagens seguem o que já está filtrado acima (busca e filtros), e o filtro de status vem por último
+  const porStatus = Object.fromEntries(STATUS.map(s => [s, 0]));
+  linhas.forEach(([p]) => { porStatus[p.status] = (porStatus[p.status] || 0) + 1; });
+  const antesDoStatus = linhas.length;
+  if (UI.status !== 'todos' && !STATUS.includes(UI.status)) UI.status = 'todos';
+  document.getElementById('chips-status').innerHTML = [['todos', 'Todos', antesDoStatus], ...STATUS.map(s => [s, s, porStatus[s] || 0])]
+    .map(([k, t, n]) => `<button class="chip ${n === 0 && k !== 'todos' ? 'zero' : ''}" type="button" data-status="${esc(k)}" aria-pressed="${UI.status === k}">${esc(t)}<span class="qtd">${n}</span></button>`).join('');
+  if (UI.status !== 'todos') linhas = linhas.filter(([p]) => p.status === UI.status);
   if (!ORDENS[UI.ordem]) UI.ordem = 'nome';
   linhas.sort(ORDENS[UI.ordem].f);
   document.getElementById('ordem').innerHTML = Object.entries(ORDENS).map(([k, o]) => `<option value="${k}" ${UI.ordem === k ? 'selected' : ''}>${o.rot}</option>`).join('');
-  document.getElementById('contagem').textContent = (q || UI.filtro !== 'todos') ? `${linhas.length} de ${base.length} produtores` : `${base.length} produtores`;
+  document.getElementById('contagem').textContent = (q || UI.filtro !== 'todos' || UI.status !== 'todos') ? `${linhas.length} de ${base.length} produtores` : `${base.length} produtores`;
 
   // cabeçalhos que ordenam; o de Produtor alterna entre A a Z e Z a A
   const ordTh = (rot, chave, cls = '') => {
@@ -1512,6 +1532,7 @@ $('tabela').addEventListener('click', e => {
   renderConsolidado();
 });
 $('chips').onclick = e => { const b = e.target.closest('[data-filtro]'); if (b) { UI.filtro = b.dataset.filtro; renderConsolidado(); } };
+$('chips-status').onclick = e => { const b = e.target.closest('[data-status]'); if (b) { UI.status = b.dataset.status; renderConsolidado(); } };
 function aplicaCampo(p, k, valor) {
   if (k === 'receitaPrev' || k === 'mediaFolha') p[k] = lerValor(valor);
   else if (k === 'pessoa') { p.pessoa = valor; p.pessoaManual = true; }
