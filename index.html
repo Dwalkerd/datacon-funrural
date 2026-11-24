@@ -87,6 +87,11 @@ main.wrap { padding-block: 20px 48px; display: grid; gap: 20px; }
 .fluxo > li { counter-increment: passo; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 4px 12px; }
 .fluxo > li::before { content: counter(passo); grid-row: span 3; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; }
 .fluxo h3 { align-self: center; }
+.fluxo { align-content: start; }
+.duas { align-items: start; }
+.fluxo .corpo { display: grid; gap: 8px; min-width: 0; }
+.passos { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.ok { background: var(--surface-2); border-left: 3px solid var(--accent); padding: 6px 10px; border-radius: 4px; font-size: 0.88rem; }
 .arquivos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .arquivo { border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; align-content: start; min-width: 0; }
 .arquivo .ok { color: var(--good); font-weight: 600; font-size: 0.82rem; }
@@ -306,7 +311,7 @@ body.modo-cliente { background: #f4f6f7; }
   <div class="wrap">
     <div class="marca">
       <h1>Funrural 2027</h1>
-      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 24/11/2026 15:05</span></span>
+      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 24/11/2026 15:13</span></span>
     </div>
     <span class="privado" title="A página lê os arquivos no seu computador. Nada é enviado para servidor.">Dados só neste navegador</span>
     <div class="acoes">
@@ -377,6 +382,14 @@ body.modo-cliente { background: #f4f6f7; }
 
   <section id="v-ajuda" data-view="ajuda" hidden>
     <div style="display:grid;gap:16px">
+      <div class="painel texto">
+        <h2>Antes de começar</h2>
+        <ul>
+          <li><b>Período dos dois relatórios:</b> os últimos 12 meses fechados, o mesmo no Encargos e no Demonstrativo. Em novembro de 2026, de <b>11/2025 a 10/2026</b>. Com 12 meses reais a página não precisa projetar nada: projetar 9 meses por 12/9 distorce quem tem venda concentrada na safra. Se o Domínio não aceitar um período que atravesse o ano, use de 01/2026 até o último mês fechado.</li>
+          <li><b>Fechamento:</b> o Fiscal confirma que o último mês está todo lançado nos clientes (o faturamento de um mês em aberto sai menor), e a Folha, que a competência está calculada.</li>
+          <li><b>Pasta:</b> salve os três arquivos numa pasta fora do OneDrive, por exemplo C:\Funrural\2026-11. O nome e a ordem não importam: a página reconhece cada arquivo pelo conteúdo.</li>
+        </ul>
+      </div>
       <div class="painel">
         <h2>Os três arquivos</h2>
         <p class="muted">A página precisa só destes arquivos. Ela separa sozinha quem é produtor, traz o nome de cada cliente e faz a conta. Não é preciso marcar empresa nem digitar nada.</p>
@@ -387,13 +400,39 @@ body.modo-cliente { background: #f4f6f7; }
           <h2>No Domínio</h2>
           <ol class="fluxo">
             <li><h3>Encargos da Empresa</h3>
-              <p class="caminho">Domínio Folha › Relatórios › Encargos › Empresa</p>
-              <p>Competência dos últimos 12 meses fechados: em novembro de 2026, de 11/2025 a 10/2026 (se o Domínio não aceitar atravessar o ano, de 01/2026 até o último mês fechado). Tipo da folha <b>Mensal</b>, modelo <b>Analítico</b>. Deixe <b>desmarcada</b> a opção <b>Demonstrar líquido na coluna Remuneração</b>: a página precisa do valor bruto. Marque <b>Emitir código da empresa</b>. No botão <b>Empresas…</b>, marque <b>todas</b>, e confira que o botão <b>Seleção…</b> (empregados) está sem asterisco, ou seja, sem filtro. Clique em <b>OK</b> para emitir e depois salve em Excel, como descrito abaixo da lista.</p></li>
+              <div class="corpo">
+                <p class="caminho">Domínio Folha › Relatórios › Encargos › Empresa</p>
+                <ol class="passos">
+                  <li><b>Competência:</b> de 11/2025 a 10/2026.</li>
+                  <li><b>Tipo da folha: Mensal.</b> <b>Modelo: Analítico.</b></li>
+                  <li>Deixe <b>desmarcada</b> a opção "Demonstrar líquido na coluna Remuneração": a página precisa do valor bruto.</li>
+                  <li>Em Opções, marque <b>"Emitir código da empresa"</b>.</li>
+                  <li>Botão <b>Empresas…</b>: marque <b>todas</b> e confirme. O botão <b>Seleção…</b> (empregados) deve estar <b>sem asterisco</b>, ou seja, sem filtro.</li>
+                  <li>Clique em <b>OK</b> e salve em Excel (veja "Como salvar em Excel", abaixo).</li>
+                </ol>
+                <p class="ok"><b>Como saber que deu certo:</b> cada bloco abre com "Cálculo: Mensal" e "Competência: 11/2025 a 10/2026". Em 15/10 foram 117 blocos.</p>
+              </div></li>
             <li><h3>Demonstrativo Faturamento</h3>
-              <p class="caminho">Domínio Escrita Fiscal › Relatórios › Acompanhamentos › Demonstrativo Faturamento</p>
-              <p>Mesmo período do Encargos. Antes, confirme com o Fiscal que o último mês do período já está todo lançado: o faturamento de um mês em aberto sai menor. No campo <b>Modelo</b>, use o mesmo de 15/10, o que abre com o título "RELATÓRIO DE FATURAMENTO" e as colunas Saídas, Serviços, Outros e Total. No botão <b>Empresas…</b>, marque <b>todas</b>. Clique em <b>OK</b> para emitir e salve em Excel, como descrito abaixo da lista. O arquivo tem uma aba por empresa.</p></li>
+              <div class="corpo">
+                <p class="caminho">Domínio Escrita Fiscal › Relatórios › Acompanhamentos › Demonstrativo Faturamento</p>
+                <ol class="passos">
+                  <li><b>Período:</b> inicial 11/2025, final 10/2026. Se o campo pedir data completa, 01/11/2025 a 31/10/2026.</li>
+                  <li>No campo <b>Modelo</b>, use o <b>mesmo de 15/10</b>: o que abre com o título "RELATÓRIO DE FATURAMENTO" e as colunas Saídas, Serviços, Outros e Total.</li>
+                  <li>Deixe sem marcar as opções do quadro <b>Opção</b> e as assinaturas, salvo orientação do Fiscal.</li>
+                  <li>Botão <b>Empresas…</b>: marque <b>todas</b> e confirme.</li>
+                  <li>Clique em <b>OK</b> e salve em Excel (veja "Como salvar em Excel", abaixo).</li>
+                </ol>
+                <p class="ok"><b>Como saber que deu certo:</b> o arquivo tem <b>uma aba por empresa</b> (270 em 15/10), e cada aba mostra "Período: 01/11/2025 a 31/10/2026" e 12 linhas de meses.</p>
+              </div></li>
             <li><h3>Planilha de controle do Fiscal</h3>
-              <p>A do mês mais recente, com a coluna <b>Tributação / Funrural</b>, em .xlsx e com todas as abas. A página usa a <b>última aba mensal</b> (ex.: 10_2026): confira que ela está completa, e não uma aba nova de mês em branco. Depois de carregar, o texto à direita da busca no Consolidado ("Fiscal: … · Faturamento: … · Folha: …") mostra a aba, o período e o número de empresas de cada arquivo: confira se o período é o que você emitiu.</p></li>
+              <div class="corpo">
+                <ol class="passos">
+                  <li>Peça ao Fiscal a versão atual em <b>.xlsx</b>, com todas as abas.</li>
+                  <li>A página usa a <b>última aba mensal</b> (por exemplo, 10_2026). Confira que ela está completa, e não é uma aba nova de mês em branco.</li>
+                  <li>A coluna <b>Tributação / Funrural</b> precisa estar preenchida. A marca pode vir sozinha ou junto do regime, por exemplo "Lucro presumido - sobre faturamento".</li>
+                </ol>
+                <p class="ok"><b>Como saber que deu certo:</b> depois de carregar, o texto à direita da busca no Consolidado ("Fiscal: … · Faturamento: … · Folha: …") mostra a aba, o período e o número de empresas de cada arquivo. Confira se o período é o que você emitiu. Em 15/10 eram 187, 270 e 108 empresas.</p>
+              </div></li>
           </ol>
           <p><b>Como salvar em Excel (Encargos e Demonstrativo):</b> com o relatório já aberto na tela, clique no ícone <b>Salvar como Excel</b> da barra de ferramentas do relatório, escolha a pasta, digite o nome do arquivo e clique em <b>Salvar</b>. Use esse ícone: ele gera a planilha com células mescladas, que é o formato que a página lê (os arquivos de 15 e 16/10 saíram assim). Não use a opção "Planilha com cabeçalho". Guarde numa pasta fora do OneDrive. Se o relatório for muito grande, digite a extensão <b>.xlsx</b> no nome do arquivo, porque o .xls vai até 65.536 linhas.</p>
           <p class="fonte">Caminhos dos relatórios: manual Domínio Folha, p. 1040–1042, e Escrita Fiscal, p. 1633–1634 (servidor, dez/2018). O jeito de salvar vem da Central de Soluções, artigo 8982 (artigos sem data). Os dois relatórios foram emitidos para a carteira toda em 15 e 16/10/2026. No Domínio Web, o disco C: do seu computador aparece como unidade M:, e o Excel não abre sozinho depois de salvar: procure o arquivo na pasta.</p>
