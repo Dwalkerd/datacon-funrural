@@ -320,7 +320,7 @@ body.modo-cliente { background: #f4f6f7; }
   <div class="wrap">
     <div class="marca">
       <h1>Funrural 2027</h1>
-      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 24/11/2026 16:25</span></span>
+      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 24/11/2026 16:32</span></span>
     </div>
     <span class="privado" title="A página lê os arquivos no seu computador. Nada é enviado para servidor.">Dados só neste navegador</span>
     <div class="acoes">
@@ -707,7 +707,7 @@ const PJ_NOME = /\b(LTDA|S\/?A|S\.A\.|EIRELI|EPP)\b/i;
 // Funrural. A coluna "Tributação / Funrural" da planilha do Fiscal traz o regime e nenhum sinal dos relatórios identifica essas
 // empresas com segurança (a lista anterior de 23/11 vinha de uma inferência pelo nome e tinha 5 códigos que não são produtores).
 // Entram sempre que o código aparece nos arquivos, com os dados do Domínio. Só códigos: nome e CNPJ vêm dos relatórios.
-// O 566 é a segunda inscrição do grupo do 535 (a líder escreveu "535, 535"): confirmar com ela.
+// O 566 é a segunda inscrição do grupo do 535 (a lista veio com "535, 535" por erro de digitação; confirmado em 24/11/2026).
 // Quando o Fiscal passar a marcar a opção do Funrural junto do regime na planilha (a página já aceita), esta lista deixa de crescer.
 const CONFIRMADOS = ['603', '485', '138', '582', '408', '580', '581', '287', '602', '535', '566', '598', '669', '553'];
 const LISTA_VERSAO = '2026-11-24b';   // sobe quando a regra de montar a lista muda e é preciso recarregar os relatórios
