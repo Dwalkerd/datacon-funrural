@@ -320,7 +320,7 @@ body.modo-cliente { background: #f4f6f7; }
   <div class="wrap">
     <div class="marca">
       <h1>Funrural 2027</h1>
-      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 24/11/2026 16:32</span></span>
+      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 24/11/2026 16:41</span></span>
     </div>
     <span class="privado" title="A página lê os arquivos no seu computador. Nada é enviado para servidor.">Dados só neste navegador</span>
     <div class="acoes">
@@ -486,7 +486,7 @@ body.modo-cliente { background: #f4f6f7; }
           <li><b>Planilha do Fiscal:</b> entram as linhas com "Sobre a folha", "Sobre faturamento" ou "Micro produtor" na coluna Tributação / Funrural, com a opção registrada. A marca pode vir sozinha ou junto do regime, por exemplo "Lucro presumido - sobre faturamento": a página reconhece o trecho da opção, então o Fiscal não precisa apagar o regime.</li>
           <li><b>Folha:</b> a página procura empregadores rurais que não estão na planilha, pelo percentual de terceiros que o Domínio calcula (cerca de 0,2% indica produtor PF; 5,2% indica produtor PJ que paga sobre a folha). Esses achados ficam <b>fora da lista</b>, no filtro "Achados pela Folha", porque a Folha mostra que há empregador rural, mas não que o escritório responde pelo Funrural dele: cliente que só faz a folha com o escritório tem o mesmo percentual e não entra. Se o achado for produtor do escritório, use <b>Devolver à lista</b>. O percentual perto de 2,7% não serve de sinal (nos dados de outubro pegou empresas que não são produtoras e não achou nenhuma das 14 da líder) e foi retirado.</li>
           <li><b>Lista da líder:</b> as empresas de lucro presumido ou real que a planilha do Fiscal traz sem a opção do Funrural, e que a líder conferiu em 24/11/2026 (14 inscrições). A página as inclui sempre que o código aparece nos arquivos, e elas têm o filtro "Confirmados pela líder". Quem não tem faturamento no período aparece como "Sem receita". Nenhum relatório do Domínio que a página lê identifica essas empresas com segurança: para os próximos anos, o caminho é o Fiscal marcar a opção do Funrural junto do regime na planilha, por exemplo "Lucro presumido - sobre faturamento" (a página já reconhece), ou conferir a lista a cada ano.</li>
-          <li><b>Mesmo CPF em mais de um código:</b> o produtor pessoa física que tem mais de uma inscrição estadual aparece no Domínio como mais de um código. Para o Funrural ele é um só, então a página soma o faturamento e a folha de todos os códigos com o mesmo CPF e mostra um produtor só, o de menor código. Os outros ficam no filtro "Fora da lista", marcados "somado no código X". Se um código não for do mesmo produtor, use o botão <b>Devolver à lista</b> no filtro "Fora da lista" (ele volta como produtor separado e deixa de somar), ou "Não somar os códigos do mesmo CPF" na ficha do produtor principal. O indicador Produtores mostra os dois números: produtores (um por CPF) e inscrições (todos os códigos). Para outra inscrição com CPF diferente, use "Somar o faturamento do código" e "Somar a folha do código".</li>
+          <li><b>Mesmo CPF em mais de um código:</b> o produtor pessoa física que tem mais de uma inscrição estadual aparece no Domínio como mais de um código. Para o Funrural ele é um só, então a página soma o faturamento e a folha de todos os códigos com o mesmo CPF e mostra um produtor só, o de menor código. Os outros códigos não viram linhas à parte: a linha do produtor mostra "2 inscrições: 532 + 576", a opção do Funrural vale para todas, e a busca por qualquer um dos códigos acha a linha. Se um código não for do mesmo produtor, use <b>Separar o código X</b> na ficha do produtor (ele volta à lista como produtor separado e deixa de somar), ou "Não somar os códigos do mesmo CPF". O filtro "Fora da lista" guarda só o que foi tirado da lista: o que não é produtor e os achados da Folha que ainda não foram aceitos. O indicador Produtores mostra os dois números: produtores (um por CPF) e inscrições (todos os códigos). Para outra inscrição com CPF diferente, use "Somar o faturamento do código" e "Somar a folha do código".</li>
           <li><b>Empregados em outro código:</b> quando outro código da Folha tem o mesmo nome do produtor, a página soma a folha dele ao produtor.</li>
           <li>A opção atual é a da planilha do Fiscal; sem ela, a que a Folha calcula (com os 20% sobre a folha, é folha).</li>
         </ul>
@@ -862,6 +862,8 @@ function codigosVinculados(p) {
 // códigos cujo faturamento soma no deste produtor: pelo CPF e os digitados
 function codigosFat(p) { return [...new Set([...codigosCpf(p), ...listaCodigos(p.fatDe)])].filter(c => c !== p.codigo && !estaSeparado(c)); }
 const todosVinculados = p => [...new Set([...codigosVinculados(p), ...codigosFat(p)])];
+// códigos somados que não são outra inscrição do mesmo CPF (folha pelo nome, ou digitados na ficha)
+const outrosVinculados = p => todosVinculados(p).filter(c => !codigosCpf(p).includes(c));
 function encsDe(p) {
   return [p.enc, ...codigosVinculados(p).map(c => S.base.enc[c] || (S.produtores[c] && S.produtores[c].enc))].filter(Boolean);
 }
@@ -1138,7 +1140,8 @@ function porNomeDesc(a, b) {   // Z a A; quem não tem nome continua no fim
 // busca: ignora acento e maiúscula; todas as palavras digitadas precisam aparecer (em qualquer ordem) no código, no nome ou no CPF/CNPJ
 function combinaBusca(p, q) {
   if (!q) return true;
-  const alvo = semAcento(`${p.codigo} ${p.nome} ${p.doc || ''}`) + ' ' + soDigitos(p.doc);
+  // inclui os códigos somados no produtor (outras inscrições do mesmo CPF), para achar a linha por qualquer um deles
+  const alvo = semAcento(`${p.codigo} ${todosVinculados(p).join(' ')} ${p.nome} ${p.doc || ''}`) + ' ' + soDigitos(p.doc);
   return q.split(/\s+/).every(w => alvo.includes(w));
 }
 const ORDENS = {
@@ -1201,8 +1204,10 @@ function renderConsolidado() {
   document.getElementById('fontes').textContent = S.exemplo ? 'Exemplo' : [`Fiscal: ${f.ctl || 'não carregada'}`, `Faturamento: ${f.fat || 'não carregado'}`, `Folha: ${f.enc || 'não carregada'}`].join(' · ');
 
   const q = semAcento(UI.busca).trim();
+  // "Fora da lista" guarda só o que foi tirado (não é produtor ou achado da Folha não aceito). Código somado em outro produtor
+  // (outra inscrição do mesmo CPF) faz parte da lista: aparece na linha do produtor, não aqui.
   // "Achados pela Folha" mostra os aceitos e os que aguardam confirmação (estes também aparecem em "Fora da lista")
-  const base = UI.filtro === 'excluidos' ? lista().filter(p => p.excluido || vinculadoA(p.codigo))
+  const base = UI.filtro === 'excluidos' ? lista().filter(p => p.excluido && !vinculadoA(p.codigo))
     : UI.filtro === 'folha' ? lista().filter(p => p.origem === 'folha' && !p.vinculoAuto && !vinculadoA(p.codigo)) : at;
   let linhas = base.map(p => [p, calcular(p)]);
   if (UI.filtro === 'mudar') linhas = linhas.filter(([, c]) => c.mudar);
@@ -1243,7 +1248,7 @@ function renderConsolidado() {
     const padrao = p.opcaoCtl ? `Fiscal: ${OPC[p.opcaoCtl]}` : dom ? `Folha: ${OPC[dom]}` : (c.semFolha ? 'Sem folha: Comercialização' : 'Não informada');
     return `<tr data-cod="${esc(p.codigo)}">
       <td class="tab">${esc(p.codigo)}</td>
-      <td class="nome">${esc(p.nome || '(sem nome)')}<span class="origem">${esc(origemTexto(p))}</span><small>${crit ? `<span class="pill crit">${crit} a conferir</span> ` : ''}${warn ? `<span class="pill warn">${warn} aviso${warn > 1 ? 's' : ''}</span> ` : ''}${vinc ? `somado no ${esc(vinc)}` : ''}${p.excluido ? 'fora da lista' : ''}${!vinc && !p.excluido && todosVinculados(p).length ? `soma ${esc(todosVinculados(p).join(', '))}` : ''}</small></td>
+      <td class="nome">${esc(p.nome || '(sem nome)')}<span class="origem">${esc(origemTexto(p))}</span><small>${crit ? `<span class="pill crit">${crit} a conferir</span> ` : ''}${warn ? `<span class="pill warn">${warn} aviso${warn > 1 ? 's' : ''}</span> ` : ''}${vinc ? `somado no ${esc(vinc)}` : ''}${p.excluido ? 'fora da lista' : ''}${!vinc && !p.excluido && codigosCpf(p).length ? `<span class="pill n" title="Mesmo CPF: faturamento e folha somam, e a opção do Funrural vale para todas as inscrições">${codigosCpf(p).length + 1} inscrições: ${esc([p.codigo, ...codigosCpf(p)].join(' + '))}</span> ` : ''}${!vinc && !p.excluido && outrosVinculados(p).length ? `soma ${esc(outrosVinculados(p).join(', '))}` : ''}</small></td>
       <td><select data-campo="pessoa" aria-label="PF ou PJ"><option ${p.pessoa === 'PF' ? 'selected' : ''}>PF</option><option ${p.pessoa === 'PJ' ? 'selected' : ''}>PJ</option></select></td>
       <td><select data-campo="opcaoAtual" aria-label="Opção atual">
         <option value="" ${!p.opcaoAtual ? 'selected' : ''}>${padrao}</option>
@@ -1312,7 +1317,7 @@ function renderCliente() {
     <div class="cab">
       <div style="display:grid;gap:4px;min-width:0">
         <h2>${esc(p.nome || p.codigo)}</h2>
-        <span class="muted small">Produtor rural pessoa ${p.pessoa === 'PJ' ? 'jurídica' : 'física'} · código ${esc(p.codigo)}</span>
+        <span class="muted small">Produtor rural pessoa ${p.pessoa === 'PJ' ? 'jurídica' : 'física'} · ${codigosCpf(p).length ? `inscrições ${esc([p.codigo, ...codigosCpf(p)].join(' e '))}` : `código ${esc(p.codigo)}`}</span>
       </div>
       <div style="display:grid;gap:4px;justify-items:end;text-align:right">
         <span class="label">Opção atual</span>
@@ -1440,6 +1445,7 @@ function renderFicha(p) {
       ${auto.length ? `<button class="btn" type="button" id="fi-auto">${p.folhaAutoOff ? 'Voltar a somar a folha de ' + esc(auto.join(', ')) : 'Não somar a folha de ' + esc(auto.join(', '))}</button>` : ''}
       ${p.separado ? `<button class="btn" type="button" id="fi-separado">Voltar a somar no código ${esc(p.separadoDe || '')}</button>` : ''}
       ${cpf.length ? `<button class="btn" type="button" id="fi-cpf">${p.cpfAutoOff ? 'Voltar a somar os códigos do mesmo CPF (' + esc(cpf.join(', ')) + ')' : 'Não somar os códigos do mesmo CPF (' + esc(cpf.join(', ')) + ')'}</button>` : ''}
+      ${cpf.filter(c => !p.cpfAutoOff).map(c => `<button class="btn" type="button" data-separar="${esc(c)}" title="Use se este código não for do mesmo produtor: ele volta à lista como produtor separado e deixa de somar">Separar o código ${esc(c)} (não é o mesmo produtor)</button>`).join('')}
       <button class="btn perigo" type="button" id="fi-excluir">${p.excluido ? 'Devolver à lista' : 'Tirar da lista (não é produtor)'}</button>
     </div>`;
 }
@@ -1605,7 +1611,13 @@ $('v-cliente').addEventListener('click', e => {
   if (e.target.id === 'fi-restaurar') { p.receitaPrev = null; p.mediaFolha = null; p.gilrat = null; mudou(false); renderCliente(); toast('Receita, folha e GILRAT voltaram aos números do Domínio.'); }
   if (e.target.id === 'fi-auto') { p.folhaAutoOff = !p.folhaAutoOff; mudou(false); renderCliente(); }
   if (e.target.id === 'fi-cpf') { p.cpfAutoOff = !p.cpfAutoOff; mudou(false); renderCliente(); }
-  if (e.target.id === 'fi-separado') { p.separado = false; agruparPorCpf(S); mudou(false); if (vinculadoA(p.codigo)) UI.sel = null; renderCliente(); toast(`Código ${p.codigo} voltou a somar no ${p.separadoDe}. Ele fica em "Fora da lista".`); }
+  if (e.target.id === 'fi-separado') { p.separado = false; agruparPorCpf(S); mudou(false); if (vinculadoA(p.codigo)) UI.sel = null; renderCliente(); toast(`Código ${p.codigo} voltou a somar no ${p.separadoDe}. Ele aparece como inscrição na linha desse produtor.`); }
+  const sepBt = e.target.closest('[data-separar]');
+  if (sepBt) {
+    const q = S.produtores[sepBt.dataset.separar]; if (!q) return;
+    devolverALista(q); mudou(false); renderCliente();
+    toast(`Código ${q.codigo} separado: volta à lista como produtor próprio e deixa de somar no ${p.codigo}.`);
+  }
   if (e.target.id === 'fi-excluir') { p.excluido = !p.excluido; if (p.origem === 'folha') p.folhaAceita = !p.excluido; mudou(false); if (p.excluido) UI.sel = null; renderCliente(); toast(p.excluido ? 'Produtor tirado da lista. Ele fica no filtro "Fora da lista".' : 'Produtor devolvido à lista.'); }
 });
 $('bt-modo-cliente').onclick = () => { document.body.classList.add('modo-cliente'); $('bt-sair-cliente').hidden = false; $('bt-pdf-2').hidden = false; window.scrollTo(0, 0); };
