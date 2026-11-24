@@ -306,7 +306,7 @@ body.modo-cliente { background: #f4f6f7; }
   <div class="wrap">
     <div class="marca">
       <h1>Funrural 2027</h1>
-      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 23/11/2026 18:14</span></span>
+      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 24/11/2026 14:25</span></span>
     </div>
     <span class="privado" title="A página lê os arquivos no seu computador. Nada é enviado para servidor.">Dados só neste navegador</span>
     <div class="acoes">
@@ -415,6 +415,7 @@ body.modo-cliente { background: #f4f6f7; }
           <li><b>Planilha do Fiscal:</b> entram as linhas com "Sobre a folha", "Sobre faturamento" ou "Micro produtor", com a opção registrada.</li>
           <li><b>Folha:</b> entram também os empregadores rurais que não estão na planilha, pelo percentual de terceiros que o Domínio calcula. Cerca de 0,2% indica produtor PF; 5,2% indica produtor PJ que paga sobre a folha; perto de 2,7% indica provável PJ que paga sobre a venda.</li>
           <li><b>Confirmados pela líder:</b> empresas que a planilha do Fiscal traz como lucro presumido ou lucro real, sem a opção do Funrural, e que não têm folha. A líder confirmou em 23/11/2026 que devem estar na base, então a página as inclui sempre que o código aparece nos arquivos. Têm o filtro "Confirmados pela líder". Quem não tem faturamento no período aparece como "Sem receita".</li>
+          <li><b>Mesmo CPF em mais de um código:</b> o produtor pessoa física que tem mais de uma inscrição estadual aparece no Domínio como mais de um código. Para o Funrural ele é um só, então a página soma o faturamento e a folha de todos os códigos com o mesmo CPF e mostra um produtor só, o de menor código. Os outros ficam no filtro "Fora da lista", marcados "somado no código X". Se um código não for do mesmo produtor, o botão "Não somar os códigos do mesmo CPF" na ficha desfaz. Para outra inscrição com CPF diferente, use "Somar o faturamento do código" e "Somar a folha do código".</li>
           <li><b>Empregados em outro código:</b> quando outro código da Folha tem o mesmo nome do produtor, a página soma a folha dele ao produtor.</li>
           <li>A opção atual é a da planilha do Fiscal; sem ela, a que a Folha calcula (com os 20% sobre a folha, é folha).</li>
         </ul>
@@ -635,8 +636,8 @@ const PJ_NOME = /\b(LTDA|S\/?A|S\.A\.|EIRELI|EPP)\b/i;
 // carregados, com os dados do Domínio. Só códigos: nome e CNPJ vêm dos relatórios, no computador de quem usa.
 // Quando o Fiscal passar a marcar a opção do Funrural na planilha (ou houver a fonte por CNAE), esta lista deixa de crescer.
 const CONFIRMADOS = ['598', '249', '735', '138', '99', '754', '582', '603', '485', '602', '535', '755'];
-const CONFIRMADOS_VERSAO = '2026-11-23';
-const CAMPOS_USUARIO = ['receitaPrev', 'mediaFolha', 'gilrat', 'opcaoAtual', 'folhaDe', 'folhaAutoOff', 'status', 'decisao', 'obs', 'excluido', 'pessoaManual'];
+const LISTA_VERSAO = '2026-11-24';   // sobe quando a regra de montar a lista muda e é preciso recarregar os relatórios
+const CAMPOS_USUARIO = ['receitaPrev', 'mediaFolha', 'gilrat', 'opcaoAtual', 'folhaDe', 'folhaAutoOff', 'fatDe', 'cpfAutoOff', 'status', 'decisao', 'obs', 'excluido', 'pessoaManual'];
 
 let S = estadoInicial();
 function estadoInicial() {
@@ -679,8 +680,8 @@ function reconstruir() {
   const temCtl = Object.keys(B.ctl).length > 0, temEnc = Object.keys(B.enc).length > 0;
   const cria = (codigo, campos) => {
     const velho = antigos[codigo] || {};
-    const p = { codigo, nome: '', doc: '', pessoa: 'PF', origem: '', tribCtl: '', opcaoCtl: null, sinal: null, folhaAuto: [],
-      receitaPrev: null, mediaFolha: null, gilrat: null, opcaoAtual: null, folhaDe: '', folhaAutoOff: false,
+    const p = { codigo, nome: '', doc: '', pessoa: 'PF', origem: '', tribCtl: '', opcaoCtl: null, sinal: null, folhaAuto: [], cpfAuto: [],
+      receitaPrev: null, mediaFolha: null, gilrat: null, opcaoAtual: null, folhaDe: '', folhaAutoOff: false, fatDe: '', cpfAutoOff: false,
       status: 'A apresentar', decisao: null, obs: '', excluido: false, pessoaManual: false, ...campos };
     for (const k of CAMPOS_USUARIO) if (velho[k] !== undefined) p[k] = velho[k];
     if (velho.pessoaManual) p.pessoa = velho.pessoa;
@@ -726,27 +727,66 @@ function reconstruir() {
   }
   for (const c of vinculados) novos[c].vinculoAuto = true;
   S.produtores = novos;
+  // 4. PF com mais de uma inscrição (vários códigos com o mesmo CPF): faturamento e folha somam no código de menor número
+  agruparPorCpf(S);
   // guarda só o que interessa quando a identificação está completa
   if (temCtl && temEnc) {
     const manter = new Set(Object.keys(novos));
-    for (const p of Object.values(novos)) String(p.folhaDe || '').split(/[\s,;]+/).filter(Boolean).forEach(c => manter.add(c));
+    for (const p of Object.values(novos)) {
+      listaCodigos(p.folhaDe).forEach(c => manter.add(c));
+      listaCodigos(p.fatDe).forEach(c => manter.add(c));
+      (p.cpfAuto || []).forEach(c => manter.add(c));
+    }
     for (const k of ['fat', 'enc', 'ctl']) for (const c of Object.keys(B[k])) if (!manter.has(c)) delete B[k][c];
   }
-  S.confirmadosEm = CONFIRMADOS_VERSAO;   // marca que a lista foi montada já com os confirmados
+  S.listaVersao = LISTA_VERSAO;   // marca que a lista foi montada com os confirmados e com a soma por CPF
+}
+
+// Para o Funrural, o produtor pessoa física é um só, qualquer que seja o número de inscrições estaduais: todos os códigos com o
+// mesmo CPF somam faturamento e folha. O produtor da lista é o código de menor número; os demais ficam "somados" nele
+// (aparecem no filtro "Fora da lista"). Só vale para CPF (11 dígitos) e ignora código inativo. Roda também ao abrir trabalho salvo.
+function agruparPorCpf(st) {
+  const B = st.base, grupos = {};
+  const entra = (codigo, doc, status) => {
+    const d = soDigitos(doc);
+    if (d.length !== 11 || /INATIV|BAIXAD|ENCERR/.test(status || '')) return;
+    (grupos[d] = grupos[d] || new Set()).add(codigo);
+  };
+  for (const c of Object.values(B.ctl || {})) entra(c.codigo, c.doc, c.status);
+  for (const f of Object.values(B.fat || {})) entra(f.codigo, f.doc, '');
+  const prods = Object.values(st.produtores || {});
+  for (const p of prods) entra(p.codigo, p.doc, '');
+  for (const p of prods) p.cpfAuto = [];
+  for (const cods of Object.values(grupos)) {
+    if (cods.size < 2) continue;
+    const doGrupo = prods.filter(p => cods.has(p.codigo) && !p.excluido).sort(porCodigo);
+    if (!doGrupo.length) continue;
+    doGrupo[0].cpfAuto = [...cods].filter(c => c !== doGrupo[0].codigo).sort((a, b) => colacao.compare(a, b));
+  }
 }
 
 // ---------- cálculo ----------
+const listaCodigos = txt => String(txt || '').split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+// códigos com o mesmo CPF (PF com mais de uma inscrição): somam faturamento e folha
+function codigosCpf(p) { return p.cpfAutoOff ? [] : (p.cpfAuto || []); }
+// códigos cuja folha soma na deste produtor: pelo nome (achados pela Folha), pelo CPF e os digitados
 function codigosVinculados(p) {
   const auto = p.folhaAutoOff ? [] : (p.folhaAuto || []);
-  const manual = String(p.folhaDe || '').split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
-  return [...new Set([...auto, ...manual])].filter(c => c !== p.codigo);
+  return [...new Set([...auto, ...codigosCpf(p), ...listaCodigos(p.folhaDe)])].filter(c => c !== p.codigo);
 }
+// códigos cujo faturamento soma no deste produtor: pelo CPF e os digitados
+function codigosFat(p) { return [...new Set([...codigosCpf(p), ...listaCodigos(p.fatDe)])].filter(c => c !== p.codigo); }
+const todosVinculados = p => [...new Set([...codigosVinculados(p), ...codigosFat(p)])];
 function encsDe(p) {
   return [p.enc, ...codigosVinculados(p).map(c => S.base.enc[c] || (S.produtores[c] && S.produtores[c].enc))].filter(Boolean);
 }
+function fatsDe(p) {
+  return [p.fat, ...codigosFat(p).map(c => S.base.fat[c] || (S.produtores[c] && S.produtores[c].fat))].filter(Boolean);
+}
+const fatTotal = p => fatsDe(p).reduce((s, f) => s + f.total, 0);
 // Todo valor em reais trabalha em centavos: arredonda uma vez, na origem, para que o que aparece na tela feche com a conta.
 const r2 = x => Math.round(((x || 0) + Number.EPSILON) * 100) / 100;
-function receitaBase(p) { return p.fat && p.fat.meses ? p.fat.total * 12 / p.fat.meses : 0; }
+function receitaBase(p) { return fatsDe(p).reduce((s, f) => s + (f.meses ? f.total * 12 / f.meses : 0), 0); }
 function mediaBase(p) { return encsDe(p).reduce((s, e) => s + (e.meses ? e.remuneracao / e.meses : 0), 0); }
 function receita(p) { return p.receitaPrev !== null && p.receitaPrev !== undefined ? p.receitaPrev : receitaBase(p); }
 function media(p) { return p.mediaFolha !== null && p.mediaFolha !== undefined ? p.mediaFolha : mediaBase(p); }
@@ -759,9 +799,17 @@ function opcaoDominio(p) {
 }
 function opcaoMarcada(p) { return p.opcaoAtual || p.opcaoCtl || null; }
 function opcaoAtual(p) { return opcaoMarcada(p) || opcaoDominio(p) || (media(p) > 0 ? null : 'C'); }
+// Código somado em outro produtor (folha ou faturamento): sai da lista principal. Se os dois se somam um ao outro,
+// vale o de menor número.
 function vinculadoA(codigo) {
-  for (const p of Object.values(S.produtores)) if (p.codigo !== codigo && !p.excluido && codigosVinculados(p).includes(codigo)) return p.codigo;
-  return null;
+  const eu = S.produtores[codigo], meus = eu ? todosVinculados(eu) : [];
+  let mutuo = null;
+  for (const p of Object.values(S.produtores)) {
+    if (p.codigo === codigo || p.excluido || !todosVinculados(p).includes(codigo)) continue;
+    if (!meus.includes(p.codigo)) return p.codigo;
+    if (!mutuo && eu && porCodigo(p, eu) < 0) mutuo = p.codigo;
+  }
+  return mutuo;
 }
 function lista() {
   return Object.values(S.produtores).sort((a, b) => (parseInt(a.codigo.replace(/\D/g, '')) || 0) - (parseInt(b.codigo.replace(/\D/g, '')) || 0) || a.codigo.localeCompare(b.codigo));
@@ -815,10 +863,14 @@ function alertas(p, c) {
     a.push({ n: p.sinal.certeza ? 'info' : 'warn', t: `Identificado pela Folha: ${p.sinal.rotulo}. ${p.tribCtl ? `Na planilha do Fiscal está como ${p.tribCtl.toLowerCase()}.` : 'Não está na planilha do Fiscal.'}${p.sinal.certeza ? '' : ' É uma inferência: confirme a classificação na Folha.'}` });
   const auto = p.folhaAutoOff ? [] : (p.folhaAuto || []);
   if (auto.length) a.push({ n: 'info', t: `Folha somada do código ${auto.join(', ')}, que tem o mesmo nome do produtor.` });
+  const cpf = codigosCpf(p), fatManual = listaCodigos(p.fatDe).filter(c => c !== p.codigo && !cpf.includes(c));
+  if (cpf.length) a.push({ n: 'info', t: `Mesmo CPF em mais de um código: o faturamento e a folha dos códigos ${cpf.join(', ')} estão somados aqui, porque o Funrural do produtor pessoa física soma todas as inscrições. Se algum desses códigos não for do mesmo produtor, use "Não somar os códigos do mesmo CPF" na ficha.` });
+  if (fatManual.length) a.push({ n: 'info', t: `Faturamento somado do código ${fatManual.join(', ')}, informado na ficha.` });
   if (c.semReceita)
-    a.push({ n: 'warn', t: 'Sem faturamento no Demonstrativo do período: não há comparação. As notas de venda deste produtor não estão na Escrita Fiscal ou estão em outro código.' });
-  if (p.fat && p.fat.meses && p.fat.meses < 12 && p.receitaPrev === null)
-    a.push({ n: 'info', t: `Receita anualizada de ${p.fat.meses} meses (${p.fat.periodo}). Safra concentrada distorce a conta: confirme a previsão com o cliente.` });
+    a.push({ n: 'warn', t: 'Sem faturamento no Demonstrativo do período: não há comparação. As notas de venda deste produtor não estão na Escrita Fiscal ou estão em outro código (se for outra inscrição do mesmo produtor, informe-o em "Somar o faturamento do código").' });
+  const fatCurto = fatsDe(p).find(f => f.meses && f.meses < 12);
+  if (fatCurto && p.receitaPrev === null)
+    a.push({ n: 'info', t: `Receita anualizada de ${fatCurto.meses} meses (${fatCurto.periodo}). Safra concentrada distorce a conta: confirme a previsão com o cliente.` });
   if (encsDe(p).some(e => e.tipo && !/mensal/i.test(e.tipo)))
     a.push({ n: 'warn', t: 'O Encargos não foi emitido com o tipo de folha Mensal. Emita de novo com Mensal para não contar o 13º duas vezes.' });
   if (c.semFolha && c.atual !== 'F')
@@ -834,15 +886,15 @@ function linhaExcel(p) {
     'Código': p.codigo, 'Produtor': p.nome, 'PF/PJ': p.pessoa,
     'Origem': p.origem === 'controle' ? `Planilha do Fiscal: ${p.tribCtl.toLowerCase()}` : (p.origem === 'confirmado' ? `Confirmado pela líder em 23/11/2026${p.tribCtl ? ` (planilha do Fiscal: ${p.tribCtl.toLowerCase()})` : ''}` : (p.sinal ? `Folha: ${p.sinal.rotulo}` : '')),
     'Opção atual': c.atual ? OPC[c.atual] : '', 'Opção calculada no Domínio': dom ? OPC[dom] : 'sem folha',
-    'Faturado no período': p.fat ? p.fat.total : '', 'Período do faturamento': p.fat ? p.fat.periodo : '',
+    'Faturado no período': fatsDe(p).length ? r2(fatTotal(p)) : '', 'Período do faturamento': p.fat ? p.fat.periodo : (fatsDe(p)[0] ? fatsDe(p)[0].periodo : ''),
     'Receita prevista 2027': c.R, 'Receita editada': p.receitaPrev !== null ? 'sim' : 'não',
     'Folha média mensal': c.M, 'Folha editada': p.mediaFolha !== null ? 'sim' : 'não', 'Empregados': empregados(p) || '',
-    'Folha somada de': codigosVinculados(p).join(', '),
+    'Folha somada de': codigosVinculados(p).join(', '), 'Faturamento somado de': codigosFat(p).join(', '),
     'Folha anual estimada': c.W, 'GILRAT': c.g,
     'Custo comercialização': c.custoC, 'Custo folha': c.semFolha ? '' : c.custoF, 'Menor custo': c.semReceita ? 'sem receita' : OPC[c.melhor],
     'Economia ao mudar': c.mudar ? c.ganho : '', 'Folha mensal de equilíbrio': c.mEq !== null && !c.semFolha ? r2(c.mEq) : '',
     'Status': p.status, 'Decisão 2027': p.decisao ? OPC[p.decisao] : '', 'Observação': p.obs,
-    'Situação': p.excluido ? 'fora da lista' : (vinculadoA(p.codigo) ? 'folha somada no ' + vinculadoA(p.codigo) : ''),
+    'Situação': p.excluido ? 'fora da lista' : (vinculadoA(p.codigo) ? 'somado no ' + vinculadoA(p.codigo) : ''),
     'Conferir': alertas(p, c).filter(a => a.n !== 'info').map(a => a.t).join(' | ')
   };
 }
@@ -850,7 +902,7 @@ function montarExcel() {
   const wb = XLSX.utils.book_new();
   const L = lista().sort(porNome);
   const ws1 = XLSX.utils.json_to_sheet(L.map(linhaExcel));
-  ws1['!cols'] = [8, 36, 6, 34, 16, 16, 18, 20, 18, 8, 16, 8, 10, 12, 16, 8, 18, 16, 16, 16, 16, 14, 16, 40, 18, 60].map(wch => ({ wch }));
+  ws1['!cols'] = [8, 36, 6, 34, 16, 16, 18, 20, 18, 8, 16, 8, 10, 12, 14, 16, 8, 18, 16, 16, 16, 16, 14, 16, 40, 18, 60].map(wch => ({ wch }));
   // valores em reais com 2 casas e alíquotas em %: o Excel mostra no padrão do computador (vírgula no Brasil)
   const MOEDA = new Set(['Faturado no período', 'Receita prevista 2027', 'Folha média mensal', 'Folha anual estimada', 'Custo comercialização', 'Custo folha', 'Economia ao mudar', 'Folha mensal de equilíbrio']);
   const faixa = XLSX.utils.decode_range(ws1['!ref']);
@@ -902,6 +954,7 @@ function migrar(s) {
     for (const p of Object.values(s.produtores || {})) { if (p.fat) s.base.fat[p.codigo] = p.fat; if (p.enc) s.base.enc[p.codigo] = p.enc; }
   }
   s.fontes = Object.assign({ fat: null, enc: null, ctl: null }, s.fontes || {});
+  agruparPorCpf(s);   // trabalho salvo antes da soma por CPF: agrupa os produtores que já estão na lista
   return s;
 }
 
@@ -1057,7 +1110,7 @@ function renderConsolidado() {
     const padrao = p.opcaoCtl ? `Fiscal: ${OPC[p.opcaoCtl]}` : dom ? `Folha: ${OPC[dom]}` : (c.semFolha ? 'Sem folha: Comercialização' : 'Não informada');
     return `<tr data-cod="${esc(p.codigo)}">
       <td class="tab">${esc(p.codigo)}</td>
-      <td class="nome">${esc(p.nome || '(sem nome)')}<span class="origem">${esc(origemTexto(p))}</span><small>${crit ? `<span class="pill crit">${crit} a conferir</span> ` : ''}${warn ? `<span class="pill warn">${warn} aviso${warn > 1 ? 's' : ''}</span> ` : ''}${vinc ? `folha somada no ${esc(vinc)}` : ''}${p.excluido ? 'fora da lista' : ''}</small></td>
+      <td class="nome">${esc(p.nome || '(sem nome)')}<span class="origem">${esc(origemTexto(p))}</span><small>${crit ? `<span class="pill crit">${crit} a conferir</span> ` : ''}${warn ? `<span class="pill warn">${warn} aviso${warn > 1 ? 's' : ''}</span> ` : ''}${vinc ? `somado no ${esc(vinc)}` : ''}${p.excluido ? 'fora da lista' : ''}${!vinc && !p.excluido && todosVinculados(p).length ? `soma ${esc(todosVinculados(p).join(', '))}` : ''}</small></td>
       <td><select data-campo="pessoa" aria-label="PF ou PJ"><option ${p.pessoa === 'PF' ? 'selected' : ''}>PF</option><option ${p.pessoa === 'PJ' ? 'selected' : ''}>PJ</option></select></td>
       <td><select data-campo="opcaoAtual" aria-label="Opção atual">
         <option value="" ${!p.opcaoAtual ? 'selected' : ''}>${padrao}</option>
@@ -1136,10 +1189,10 @@ function renderCliente() {
     <div class="premissas-cli">
       <div class="campo"><label class="label" for="cli-receita">Receita bruta prevista para 2027</label>
         <input id="cli-receita" inputmode="decimal" value="${dinheiro(receita(p))}">
-        <span class="ref">${p.fat ? `Faturado no Domínio: ${brl(p.fat.total)} (${esc(p.fat.periodo)})` : 'Sem faturamento no Domínio'}</span></div>
+        <span class="ref">${fatsDe(p).length ? `Faturado no Domínio: ${brl(fatTotal(p))} (${esc((p.fat || fatsDe(p)[0]).periodo)})${codigosFat(p).length ? ` · soma dos códigos ${esc([p.codigo, ...codigosFat(p)].join(', '))}` : ''}` : 'Sem faturamento no Domínio'}</span></div>
       <div class="campo"><label class="label" for="cli-folha">Folha de pagamento média por mês</label>
         <input id="cli-folha" inputmode="decimal" value="${dinheiro(media(p))}">
-        <span class="ref">${mediaBase(p) ? `Média no Domínio: ${brl(mediaBase(p))} · ${NUM0.format(empregados(p))} empregados` : 'Sem folha no Domínio'}</span></div>
+        <span class="ref">${mediaBase(p) ? `Média no Domínio: ${brl(mediaBase(p))} · ${NUM0.format(empregados(p))} empregados${codigosVinculados(p).length ? ` · soma dos códigos ${esc([p.codigo, ...codigosVinculados(p)].join(', '))}` : ''}` : 'Sem folha no Domínio'}</span></div>
       <div class="campo"><label class="label" for="cli-gilrat">GILRAT da atividade</label>
         <select id="cli-gilrat">${[0.01, 0.02, 0.03].map(v => `<option value="${v}" ${Math.abs(gilrat(p) - v) < 1e-9 ? 'selected' : ''}>${pct(v)}</option>`).join('')}</select>
         <span class="ref">Grau de risco do CNAE (1%, 2% ou 3%)</span></div>
@@ -1237,7 +1290,7 @@ function renderResultadoCliente() {
 function renderFicha(p) {
   const dom = opcaoDominio(p);
   const padrao = p.opcaoCtl ? `Como na planilha do Fiscal: ${OPC[p.opcaoCtl]}` : dom ? `Como na Folha: ${OPC[dom]}` : 'Não informada';
-  const auto = p.folhaAuto || [];
+  const auto = p.folhaAuto || [], cpf = p.cpfAuto || [];
   document.getElementById('ficha').innerHTML = `
     <h3>Ficha do produtor (só a equipe vê)</h3>
     <div class="grade">
@@ -1245,12 +1298,14 @@ function renderFicha(p) {
       <div class="campo"><label class="label" for="fi-opcao">Opção atual</label><select id="fi-opcao" data-fcampo="opcaoAtual"><option value="" ${!p.opcaoAtual ? 'selected' : ''}>${padrao}</option><option value="C" ${p.opcaoAtual === 'C' ? 'selected' : ''}>Comercialização</option><option value="F" ${p.opcaoAtual === 'F' ? 'selected' : ''}>Folha</option></select></div>
       <div class="campo"><label class="label" for="fi-status">Status</label><select id="fi-status" data-fcampo="status">${STATUS.map(s => `<option ${p.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
       <div class="campo"><label class="label" for="fi-decisao">Decisão 2027</label><select id="fi-decisao" data-fcampo="decisao"><option value="" ${!p.decisao ? 'selected' : ''}>—</option><option value="C" ${p.decisao === 'C' ? 'selected' : ''}>Comercialização</option><option value="F" ${p.decisao === 'F' ? 'selected' : ''}>Folha</option></select></div>
-      <div class="campo"><label class="label" for="fi-folhade">Somar a folha do código</label><input id="fi-folhade" data-fcampo="folhaDe" value="${esc(p.folhaDe)}" placeholder="ex.: 812, 813"><span class="ref">${auto.length ? `Já somado pelo nome: ${esc(auto.join(', '))}` : 'Só se o nome for diferente'}</span></div>
-      <div class="campo" style="grid-column: span 3"><label class="label" for="fi-obs">Observação</label><input id="fi-obs" data-fcampo="obs" value="${esc(p.obs)}" placeholder="O que o cliente disse, próximos passos"></div>
+      <div class="campo"><label class="label" for="fi-folhade">Somar a folha do código</label><input id="fi-folhade" data-fcampo="folhaDe" value="${esc(p.folhaDe)}" placeholder="ex.: 812, 813"><span class="ref">${[auto.length ? `Já somado pelo nome: ${auto.join(', ')}` : '', cpf.length ? `Já somado pelo CPF: ${cpf.join(', ')}` : ''].filter(Boolean).map(esc).join(' · ') || 'Só se o nome e o CPF forem diferentes'}</span></div>
+      <div class="campo"><label class="label" for="fi-fatde">Somar o faturamento do código</label><input id="fi-fatde" data-fcampo="fatDe" value="${esc(p.fatDe)}" placeholder="ex.: 812, 813"><span class="ref">${cpf.length ? `Já somado pelo CPF: ${esc(cpf.join(', '))}` : 'Para outra inscrição do mesmo produtor, quando o CPF for diferente'}</span></div>
+      <div class="campo" style="grid-column: span 2"><label class="label" for="fi-obs">Observação</label><input id="fi-obs" data-fcampo="obs" value="${esc(p.obs)}" placeholder="O que o cliente disse, próximos passos"></div>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:8px">
       <button class="btn" type="button" id="fi-restaurar">Voltar aos números do Domínio</button>
       ${auto.length ? `<button class="btn" type="button" id="fi-auto">${p.folhaAutoOff ? 'Voltar a somar a folha de ' + esc(auto.join(', ')) : 'Não somar a folha de ' + esc(auto.join(', '))}</button>` : ''}
+      ${cpf.length ? `<button class="btn" type="button" id="fi-cpf">${p.cpfAutoOff ? 'Voltar a somar os códigos do mesmo CPF (' + esc(cpf.join(', ')) + ')' : 'Não somar os códigos do mesmo CPF (' + esc(cpf.join(', ')) + ')'}</button>` : ''}
       <button class="btn perigo" type="button" id="fi-excluir">${p.excluido ? 'Devolver à lista' : 'Tirar da lista (não é produtor)'}</button>
     </div>`;
 }
@@ -1295,13 +1350,13 @@ function render() {
   const faltam = S.exemplo ? [] : [['ctl', 'a planilha de controle do Fiscal (sem ela, ficam de fora os produtores sem empregados e a opção registrada)'], ['enc', 'o Encargos da Empresa (sem ele, não há folha nem conferência da opção)'], ['fat', 'o Demonstrativo Faturamento (sem ele, não há receita)']].filter(([k]) => !S.fontes[k]);
   const av = document.getElementById('aviso-faltam');
   const semCtl = faltam.some(([k]) => k === 'ctl');
-  // trabalho salvo antes de os produtores confirmados entrarem: o arquivo não guarda os dados deles, então é preciso recarregar os relatórios
-  const confirmadosPendentes = !S.exemplo && !faltam.length && Object.keys(S.produtores).length > 0 && S.confirmadosEm !== CONFIRMADOS_VERSAO;
+  // trabalho salvo antes de os produtores confirmados e da soma por CPF: o arquivo não guarda os dados de quem não era produtor, então é preciso recarregar os relatórios
+  const confirmadosPendentes = !S.exemplo && !faltam.length && Object.keys(S.produtores).length > 0 && S.listaVersao !== LISTA_VERSAO;
   av.hidden = !faltam.length && !confirmadosPendentes;
   av.classList.toggle('info', !semCtl);
   av.innerHTML = faltam.length
     ? `<span><strong>${semCtl ? `Lista parcial: ${ativos().length} produtores, só os que têm empregados.` : 'Falta carregar:'}</strong> ${semCtl ? 'Arraste também ' : ''}${faltam.map(x => x[1]).join('; ')}.</span><button class="btn" type="button" data-carregar>Carregar arquivos</button>`
-    : (confirmadosPendentes ? `<span><strong>Atualização:</strong> a lista agora inclui ${CONFIRMADOS.length} produtores confirmados pela líder. Carregue de novo os três relatórios do Domínio (Encargos, Demonstrativo e planilha do Fiscal) para trazer os dados deles. O que já foi editado fica guardado.</span><button class="btn" type="button" data-carregar>Carregar arquivos</button>` : '');
+    : (confirmadosPendentes ? `<span><strong>Atualização:</strong> a lista agora soma faturamento e folha dos códigos do mesmo CPF e inclui ${CONFIRMADOS.length} produtores confirmados pela líder. Carregue de novo os três relatórios do Domínio (Encargos, Demonstrativo e planilha do Fiscal) para trazer os dados que faltam. O que já foi editado fica guardado.</span><button class="btn" type="button" data-carregar>Carregar arquivos</button>` : '');
   document.querySelectorAll('[data-view]').forEach(v => { v.hidden = v.dataset.view !== UI.aba; });
   document.querySelectorAll('[role=tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.aba === UI.aba));
   if (UI.aba === 'consolidado') renderConsolidado();
@@ -1392,6 +1447,7 @@ $('v-cliente').addEventListener('click', e => {
   const p = S.produtores[UI.sel]; if (!p) return;
   if (e.target.id === 'fi-restaurar') { p.receitaPrev = null; p.mediaFolha = null; p.gilrat = null; mudou(false); renderCliente(); toast('Receita, folha e GILRAT voltaram aos números do Domínio.'); }
   if (e.target.id === 'fi-auto') { p.folhaAutoOff = !p.folhaAutoOff; mudou(false); renderCliente(); }
+  if (e.target.id === 'fi-cpf') { p.cpfAutoOff = !p.cpfAutoOff; mudou(false); renderCliente(); }
   if (e.target.id === 'fi-excluir') { p.excluido = !p.excluido; mudou(false); if (p.excluido) UI.sel = null; renderCliente(); toast(p.excluido ? 'Produtor tirado da lista. Ele fica no filtro "Fora da lista".' : 'Produtor devolvido à lista.'); }
 });
 $('bt-modo-cliente').onclick = () => { document.body.classList.add('modo-cliente'); $('bt-sair-cliente').hidden = false; $('bt-pdf-2').hidden = false; window.scrollTo(0, 0); };
