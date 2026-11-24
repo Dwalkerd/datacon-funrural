@@ -311,7 +311,7 @@ body.modo-cliente { background: #f4f6f7; }
   <div class="wrap">
     <div class="marca">
       <h1>Funrural 2027</h1>
-      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 24/11/2026 15:13</span></span>
+      <span class="sub">Planejamento da contribuição do produtor rural · Datacon <span class="versao" title="Versão da página: confira se mudou depois de uma correção">v. 24/11/2026 15:25</span></span>
     </div>
     <span class="privado" title="A página lê os arquivos no seu computador. Nada é enviado para servidor.">Dados só neste navegador</span>
     <div class="acoes">
@@ -338,6 +338,7 @@ body.modo-cliente { background: #f4f6f7; }
     <button class="btn" type="button" id="bt-carregar-2">Carregar arquivos</button>
   </div>
   <div class="aviso info so-equipe" id="aviso-faltam" hidden></div>
+  <div class="aviso so-equipe" id="aviso-periodo" hidden></div>
 
   <section id="v-consolidado" data-view="consolidado">
     <div style="display:grid;gap:16px">
@@ -385,7 +386,9 @@ body.modo-cliente { background: #f4f6f7; }
       <div class="painel texto">
         <h2>Antes de começar</h2>
         <ul>
-          <li><b>Período dos dois relatórios:</b> os últimos 12 meses fechados, o mesmo no Encargos e no Demonstrativo. Em novembro de 2026, de <b>11/2025 a 10/2026</b>. Com 12 meses reais a página não precisa projetar nada: projetar 9 meses por 12/9 distorce quem tem venda concentrada na safra. Se o Domínio não aceitar um período que atravesse o ano, use de 01/2026 até o último mês fechado.</li>
+          <li><b>A base começa sempre em janeiro.</b> Emita os dois relatórios de <b>janeiro ao último mês fechado</b> do ano, o mesmo período no Encargos e no Demonstrativo. Em novembro de 2026, de <b>01/2026 a 10/2026</b>.</li>
+          <li><b>O fator de projeção é 12 ÷ mês final.</b> A página multiplica o faturado de janeiro ao mês final por 12 ÷ o número de meses: janeiro a setembro × 12/9, janeiro a outubro × 12/10, e assim por diante. O mês final é lido sozinho do período do Demonstrativo e pode ser mudado em <b>Premissas › Mês final de referência</b>. Com janeiro a outubro, o fator é <b>12/10</b>.</li>
+          <li><b>A folha não leva esse fator.</b> Ela entra pela média mensal (Remuneração ÷ número de meses do período) × 13,3333. Por isso o período da Folha deve ser o mesmo do faturamento.</li>
           <li><b>Fechamento:</b> o Fiscal confirma que o último mês está todo lançado nos clientes (o faturamento de um mês em aberto sai menor), e a Folha, que a competência está calculada.</li>
           <li><b>Pasta:</b> salve os três arquivos numa pasta fora do OneDrive, por exemplo C:\Funrural\2026-11. O nome e a ordem não importam: a página reconhece cada arquivo pelo conteúdo.</li>
         </ul>
@@ -403,26 +406,26 @@ body.modo-cliente { background: #f4f6f7; }
               <div class="corpo">
                 <p class="caminho">Domínio Folha › Relatórios › Encargos › Empresa</p>
                 <ol class="passos">
-                  <li><b>Competência:</b> de 11/2025 a 10/2026.</li>
+                  <li><b>Competência:</b> de janeiro ao mês final. Em novembro de 2026, de <b>01/2026 a 10/2026</b>. A base começa sempre em janeiro.</li>
                   <li><b>Tipo da folha: Mensal.</b> <b>Modelo: Analítico.</b></li>
                   <li>Deixe <b>desmarcada</b> a opção "Demonstrar líquido na coluna Remuneração": a página precisa do valor bruto.</li>
                   <li>Em Opções, marque <b>"Emitir código da empresa"</b>.</li>
                   <li>Botão <b>Empresas…</b>: marque <b>todas</b> e confirme. O botão <b>Seleção…</b> (empregados) deve estar <b>sem asterisco</b>, ou seja, sem filtro.</li>
                   <li>Clique em <b>OK</b> e salve em Excel (veja "Como salvar em Excel", abaixo).</li>
                 </ol>
-                <p class="ok"><b>Como saber que deu certo:</b> cada bloco abre com "Cálculo: Mensal" e "Competência: 11/2025 a 10/2026". Em 15/10 foram 117 blocos.</p>
+                <p class="ok"><b>Como saber que deu certo:</b> cada bloco abre com "Cálculo: Mensal" e "Competência: 01/2026 a 10/2026". Em 15/10 (janeiro a setembro) foram 117 blocos.</p>
               </div></li>
             <li><h3>Demonstrativo Faturamento</h3>
               <div class="corpo">
                 <p class="caminho">Domínio Escrita Fiscal › Relatórios › Acompanhamentos › Demonstrativo Faturamento</p>
                 <ol class="passos">
-                  <li><b>Período:</b> inicial 11/2025, final 10/2026. Se o campo pedir data completa, 01/11/2025 a 31/10/2026.</li>
+                  <li><b>Período:</b> inicial 01/2026 (a base começa sempre em janeiro) e final 10/2026. Se o campo pedir data completa, 01/01/2026 a 31/10/2026.</li>
                   <li>No campo <b>Modelo</b>, use o <b>mesmo de 15/10</b>: o que abre com o título "RELATÓRIO DE FATURAMENTO" e as colunas Saídas, Serviços, Outros e Total.</li>
                   <li>Deixe sem marcar as opções do quadro <b>Opção</b> e as assinaturas, salvo orientação do Fiscal.</li>
                   <li>Botão <b>Empresas…</b>: marque <b>todas</b> e confirme.</li>
                   <li>Clique em <b>OK</b> e salve em Excel (veja "Como salvar em Excel", abaixo).</li>
                 </ol>
-                <p class="ok"><b>Como saber que deu certo:</b> o arquivo tem <b>uma aba por empresa</b> (270 em 15/10), e cada aba mostra "Período: 01/11/2025 a 31/10/2026" e 12 linhas de meses.</p>
+                <p class="ok"><b>Como saber que deu certo:</b> o arquivo tem <b>uma aba por empresa</b> (270 em 15/10), e cada aba mostra "Período: 01/01/2026 a 31/10/2026" e 10 linhas de meses (janeiro a outubro).</p>
               </div></li>
             <li><h3>Planilha de controle do Fiscal</h3>
               <div class="corpo">
@@ -448,6 +451,11 @@ body.modo-cliente { background: #f4f6f7; }
             <li><h3>Registrar e guardar</h3><p>Marque status e decisão. <b>Baixar Excel</b> guarda tudo; salve na mesma pasta dos relatórios, fora do OneDrive. <b>Abrir Excel salvo</b> devolve o trabalho em outro dia ou outro computador.</p></li>
           </ol>
         </div>
+      </div>
+      <div class="painel texto">
+        <h3>Como a receita prevista é calculada</h3>
+        <p>Receita prevista = faturado de janeiro ao mês final × 12 ÷ mês final. Exemplo fictício: faturado de janeiro a outubro de R$ 1.000.000,00 × 12/10 = R$ 1.200.000,00. Em <b>Premissas</b>, o campo <b>Mês final de referência</b> mostra o fator em uso, que vem do período do Demonstrativo e pode ser mudado à mão. Se o Demonstrativo não começar em janeiro, se terminar num mês diferente do informado ou se a Folha for de outro período, a página avisa no alto.</p>
+        <p class="fonte">A projeção supõe que os meses que faltam vendem como a média do período. Para quem vende pouco no fim do ano, ela superestima: confirme a previsão com o cliente nos casos em que a folha está perto do ponto de equilíbrio.</p>
       </div>
       <div class="painel texto">
         <h3>Como conferir a folha de um produtor</h3>
@@ -655,6 +663,7 @@ const PADRAO = {
   multFolha: 40 / 3,
   gilratPadrao: 0.03,
   margem: 0.05,
+  mesFinal: null,   // mês final de referência (1 a 12); null = automático, pelo período do Demonstrativo
   aprovadoPor: '',
   aprovadoEm: '',
   PF: [
@@ -695,7 +704,7 @@ function estadoInicial() {
 }
 function carregarExemplos() {
   S = estadoInicial(); S.exemplo = true;
-  const per = '11/2025 a 10/2026';
+  const per = '01/2026 a 12/2026';
   const ctl = (codigo, nome, trib, doc) => { S.base.ctl[codigo] = { codigo, nome, trib, status: 'ATIVA', doc }; };
   const fat = (codigo, nome, total) => { S.base.fat[codigo] = { codigo, nome, doc: '', total, meses: 12, mesesMov: 12, periodo: per }; };
   const enc = (codigo, nome, rem, empregados, folha) => {
@@ -838,7 +847,38 @@ function fatsDe(p) {
 const fatTotal = p => fatsDe(p).reduce((s, f) => s + f.total, 0);
 // Todo valor em reais trabalha em centavos: arredonda uma vez, na origem, para que o que aparece na tela feche com a conta.
 const r2 = x => Math.round(((x || 0) + Number.EPSILON) * 100) / 100;
-function receitaBase(p) { return fatsDe(p).reduce((s, f) => s + (f.meses ? f.total * 12 / f.meses : 0), 0); }
+// Receita do ano projetada: faturado de janeiro ao mês final × 12 ÷ mês final. A base começa SEMPRE em janeiro.
+// O "Mês final de referência" (Premissas) manda no fator; em automático, vale o número de meses do período do Demonstrativo
+// (de janeiro a outubro são 10 meses: × 12/10; de janeiro a setembro, × 12/9).
+const NOME_MES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+function mesesBase(f) { const m = S.premissas.mesFinal; return m >= 1 && m <= 12 ? m : (f && f.meses ? f.meses : 0); }
+function fatorAnual(f) { const n = mesesBase(f); return n > 0 ? 12 / n : 0; }
+function receitaBase(p) { return fatsDe(p).reduce((s, f) => s + f.total * fatorAnual(f), 0); }
+function fatorTxt(p) { const n = mesesBase(p.fat || fatsDe(p)[0]); return n > 0 && n < 12 ? ` · projetado × 12/${n}` : ''; }
+// número de meses mais comum entre os Demonstrativos carregados (o "automático" das Premissas)
+function mesesDosDados() {
+  const cont = {};
+  for (const f of Object.values(S.base.fat || {})) if (f.meses) cont[f.meses] = (cont[f.meses] || 0) + 1;
+  const e = Object.entries(cont).sort((a, b) => b[1] - a[1])[0];
+  return e ? +e[0] : null;
+}
+function periodoDe(txt) {
+  const m = String(txt || '').match(/(\d{2})\/(\d{4})\s*a\s*(\d{2})\/(\d{4})/);
+  return m ? { ini: +m[1], anoIni: +m[2], fim: +m[3], anoFim: +m[4] } : null;
+}
+// Conferências do período, mostradas no alto da página: base em janeiro, mês final coerente e mesmo período na Folha.
+function avisosPeriodo() {
+  if (S.exemplo) return [];
+  const out = [], mf = S.premissas.mesFinal;
+  const pers = [...new Set(Object.values(S.base.fat || {}).map(f => f.periodo).filter(Boolean))];
+  const encs = [...new Set(Object.values(S.base.enc || {}).map(e => e.competencia).filter(Boolean))];
+  const pf = pers.length ? periodoDe(pers[0]) : null, pe = encs.length ? periodoDe(encs[0]) : null;
+  const rot = p => `${String(p.ini).padStart(2, '0')}/${p.anoIni} a ${String(p.fim).padStart(2, '0')}/${p.anoFim}`;
+  if (pf && pf.ini !== 1) out.push(`O Demonstrativo começa em ${NOME_MES[pf.ini - 1]} de ${pf.anoIni}, e a base deve começar sempre em janeiro: o fator 12 ÷ mês final só vale de janeiro até o mês final. Emita de novo, de janeiro ao mês de referência.`);
+  if (pf && mf && pf.ini === 1 && pf.fim !== mf) out.push(`O mês final de referência está em ${NOME_MES[mf - 1]}, mas o Demonstrativo termina em ${NOME_MES[pf.fim - 1]}. Ajuste em Premissas ou volte para Automático.`);
+  if (pf && pe && (pf.ini !== pe.ini || pf.fim !== pe.fim || pf.anoIni !== pe.anoIni || pf.anoFim !== pe.anoFim)) out.push(`Folha e faturamento são de períodos diferentes (Encargos: ${rot(pe)}; Demonstrativo: ${rot(pf)}). Use o mesmo período nos dois relatórios.`);
+  return out;
+}
 function mediaBase(p) { return encsDe(p).reduce((s, e) => s + (e.meses ? e.remuneracao / e.meses : 0), 0); }
 function receita(p) { return p.receitaPrev !== null && p.receitaPrev !== undefined ? p.receitaPrev : receitaBase(p); }
 function media(p) { return p.mediaFolha !== null && p.mediaFolha !== undefined ? p.mediaFolha : mediaBase(p); }
@@ -920,9 +960,9 @@ function alertas(p, c) {
   if (fatManual.length) a.push({ n: 'info', t: `Faturamento somado do código ${fatManual.join(', ')}, informado na ficha.` });
   if (c.semReceita)
     a.push({ n: 'warn', t: 'Sem faturamento no Demonstrativo do período: não há comparação. As notas de venda deste produtor não estão na Escrita Fiscal ou estão em outro código (se for outra inscrição do mesmo produtor, informe-o em "Somar o faturamento do código").' });
-  const fatCurto = fatsDe(p).find(f => f.meses && f.meses < 12);
+  const fatCurto = fatsDe(p).find(f => mesesBase(f) > 0 && mesesBase(f) < 12);
   if (fatCurto && p.receitaPrev === null)
-    a.push({ n: 'info', t: `Receita anualizada de ${fatCurto.meses} meses (${fatCurto.periodo}). Safra concentrada distorce a conta: confirme a previsão com o cliente.` });
+    a.push({ n: 'info', t: `Receita projetada: faturado de ${fatCurto.periodo} × 12/${mesesBase(fatCurto)}. Venda concentrada na safra distorce a projeção: confirme a previsão com o cliente.` });
   if (encsDe(p).some(e => e.tipo && !/mensal/i.test(e.tipo)))
     a.push({ n: 'warn', t: 'O Encargos não foi emitido com o tipo de folha Mensal. Emita de novo com Mensal para não contar o 13º duas vezes.' });
   if (c.semFolha && c.atual !== 'F')
@@ -965,7 +1005,7 @@ function montarExcel() {
   }
   XLSX.utils.book_append_sheet(wb, ws1, 'Consolidado');
   const pr = S.premissas;
-  const prem = [['Premissa', 'Valor'], ['Folha anual = média mensal ×', pr.multFolha], ['GILRAT padrão', pr.gilratPadrao], ['Diferença mínima para sinalizar', pr.margem], [], ['Pessoa', 'Contribuição', 'Alíquota', 'Base', 'Incide em', 'Fonte']];
+  const prem = [['Premissa', 'Valor'], ['Folha anual = média mensal ×', pr.multFolha], ['GILRAT padrão', pr.gilratPadrao], ['Diferença mínima para sinalizar', pr.margem], ['Mês final de referência (fator 12/N)', pr.mesFinal || (mesesDosDados() ? `automático: ${mesesDosDados()}` : 'automático')], [], ['Pessoa', 'Contribuição', 'Alíquota', 'Base', 'Incide em', 'Fonte']];
   for (const k of ['PF', 'PJ']) for (const l of pr[k]) prem.push([k, l.nome, l.gilrat ? 'do produtor' : l.aliq, l.base, { C: 'Comercialização', F: 'Folha', CF: 'Nas duas' }[l.incide], l.fonte || '']);
   const wsPrem = XLSX.utils.aoa_to_sheet(prem);
   prem.forEach((linha, r) => {
@@ -1241,7 +1281,7 @@ function renderCliente() {
     <div class="premissas-cli">
       <div class="campo"><label class="label" for="cli-receita">Receita bruta prevista para 2027</label>
         <input id="cli-receita" inputmode="decimal" value="${dinheiro(receita(p))}">
-        <span class="ref">${fatsDe(p).length ? `Faturado no Domínio: ${brl(fatTotal(p))} (${esc((p.fat || fatsDe(p)[0]).periodo)})${codigosFat(p).length ? ` · soma dos códigos ${esc([p.codigo, ...codigosFat(p)].join(', '))}` : ''}` : 'Sem faturamento no Domínio'}</span></div>
+        <span class="ref">${fatsDe(p).length ? `Faturado no Domínio: ${brl(fatTotal(p))} (${esc((p.fat || fatsDe(p)[0]).periodo)})${fatorTxt(p)}${codigosFat(p).length ? ` · soma dos códigos ${esc([p.codigo, ...codigosFat(p)].join(', '))}` : ''}` : 'Sem faturamento no Domínio'}</span></div>
       <div class="campo"><label class="label" for="cli-folha">Folha de pagamento média por mês</label>
         <input id="cli-folha" inputmode="decimal" value="${dinheiro(media(p))}">
         <span class="ref">${mediaBase(p) ? `Média no Domínio: ${brl(mediaBase(p))} · ${NUM0.format(empregados(p))} empregados${codigosVinculados(p).length ? ` · soma dos códigos ${esc([p.codigo, ...codigosVinculados(p)].join(', '))}` : ''}` : 'Sem folha no Domínio'}</span></div>
@@ -1380,6 +1420,7 @@ function renderPremissas() {
         <div class="campo"><label class="label" for="pr-mult">Folha anual = média mensal ×</label><input id="pr-mult" inputmode="decimal" value="${NUM4.format(pr.multFolha)}"><span class="ref">13,3333 = 12 meses + 13º + 1/3 de férias (usado sem arredondar)</span></div>
         <div class="campo"><label class="label" for="pr-gilrat">GILRAT padrão</label><select id="pr-gilrat">${[0.01, 0.02, 0.03].map(v => `<option value="${v}" ${Math.abs(pr.gilratPadrao - v) < 1e-9 ? 'selected' : ''}>${pct(v)}</option>`).join('')}</select><span class="ref">Padrão do escritório para o produtor rural</span></div>
         <div class="campo"><label class="label" for="pr-margem">Diferença mínima para sinalizar mudança</label><input id="pr-margem" inputmode="decimal" value="${(100 * pr.margem).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}"><span class="ref">% do custo atual; só afeta o filtro "Mudar compensa"</span></div>
+        <div class="campo"><label class="label" for="pr-mes">Mês final de referência</label><select id="pr-mes"><option value="" ${!pr.mesFinal ? 'selected' : ''}>Automático (pelo Demonstrativo)</option>${NOME_MES.map((n, i) => `<option value="${i + 1}" ${pr.mesFinal === i + 1 ? 'selected' : ''}>${n[0].toUpperCase() + n.slice(1)} (12/${i + 1})</option>`).join('')}</select><span class="ref">A base começa sempre em janeiro. Receita prevista = faturado de janeiro ao mês final × 12 ÷ mês final. Em uso: ${(pr.mesFinal || mesesDosDados()) ? `12/${pr.mesFinal || mesesDosDados()} (${pr.mesFinal ? 'manual' : 'automático'})` : 'nenhum Demonstrativo carregado'}</span></div>
         <div class="campo"><span class="label">Restaurar</span><button class="btn" type="button" id="pr-restaurar">Restaurar o padrão da planilha</button></div>
       </div>
     </div>
@@ -1409,6 +1450,9 @@ function render() {
   av.innerHTML = faltam.length
     ? `<span><strong>${semCtl ? `Lista parcial: ${ativos().length} produtores, só os que têm empregados.` : 'Falta carregar:'}</strong> ${semCtl ? 'Arraste também ' : ''}${faltam.map(x => x[1]).join('; ')}.</span><button class="btn" type="button" data-carregar>Carregar arquivos</button>`
     : (confirmadosPendentes ? `<span><strong>Atualização:</strong> a lista agora soma faturamento e folha dos códigos do mesmo CPF e inclui ${CONFIRMADOS.length} produtores confirmados pela líder. Carregue de novo os três relatórios do Domínio (Encargos, Demonstrativo e planilha do Fiscal) para trazer os dados que faltam. O que já foi editado fica guardado.</span><button class="btn" type="button" data-carregar>Carregar arquivos</button>` : '');
+  const avPer = avisosPeriodo(), elPer = document.getElementById('aviso-periodo');
+  elPer.hidden = !avPer.length;
+  elPer.innerHTML = avPer.map(t => `<span><strong>Período:</strong> ${esc(t)}</span>`).join('');
   document.querySelectorAll('[data-view]').forEach(v => { v.hidden = v.dataset.view !== UI.aba; });
   document.querySelectorAll('[role=tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.aba === UI.aba));
   if (UI.aba === 'consolidado') renderConsolidado();
@@ -1515,6 +1559,7 @@ $('v-premissas').addEventListener('change', e => {
   else if (el.id === 'pr-mult') { const v = lerValor(el.value); if (v) pr.multFolha = v; }
   else if (el.id === 'pr-gilrat') pr.gilratPadrao = parseFloat(el.value);
   else if (el.id === 'pr-margem') { const v = lerValor(el.value); if (v !== null) pr.margem = v / 100; }
+  else if (el.id === 'pr-mes') { pr.mesFinal = el.value ? +el.value : null; }
   mudou();
 });
 $('v-premissas').addEventListener('click', e => {
